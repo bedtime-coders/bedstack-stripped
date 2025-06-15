@@ -157,13 +157,6 @@ const api = new Elysia({ prefix: "/api" })
 		app.use(usersModel).get(
 			"/",
 			async ({ auth: { sign, jwtPayload } }) => {
-				if (!jwtPayload) {
-					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-						token: [
-							"is missing or malformed - must be provided in Authorization header with 'Token ' prefix, e.g. 'Token jwt.token.here'",
-						],
-					});
-				}
 				const user = await db.query.users.findFirst({
 					where: eq(users.id, jwtPayload.uid),
 				});
