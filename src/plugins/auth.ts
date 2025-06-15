@@ -54,13 +54,17 @@ export const auth = () =>
 			// 	},
 			// },
 		})
-		.derive({ as: "global" }, ({ jwt }) => ({
-			auth: {
-				async sign(payload: Record<string, string | number>) {
-					return await jwt.sign({
-						...payload,
-						iat: Math.floor(Date.now() / 1000),
-					});
+		.derive({ as: "global" }, async ({ jwt, token }) => {
+			const decoded = token ? await jwt.verify(token) : undefined;
+			return {
+				auth: {
+					async sign(payload: Record<string, string | number>) {
+						return await jwt.sign({
+							...payload,
+							iat: Math.floor(Date.now() / 1000),
+						});
+					},
+					jwtDecodedPayload: decoded ?? undefined,
 				},
-			},
-		}));
+			};
+		});
