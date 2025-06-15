@@ -4,12 +4,12 @@ import { auth } from "@/plugins/auth";
 import { openapi } from "@/plugins/openapi";
 import { users } from "@/schema";
 import env from "@env";
+import chalk from "chalk";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { pick } from "radashi";
+import { mapKeys, pick } from "radashi";
 import { errors } from "./plugins/errors";
-import chalk from "chalk";
 
 const usersModel = new Elysia().model({
 	LoginUser: t.Object({
@@ -101,7 +101,11 @@ const api = new Elysia({ prefix: "/api" })
 					}
 					return {
 						user: {
-							token: await sign(pick(foundUser, ["id", "email", "username"])),
+							token: await sign(
+								mapKeys(pick(foundUser, ["id", "email", "username"]), (key) =>
+									key === "id" ? "uid" : key,
+								) as Record<"email" | "username", string> & { uid: number },
+							),
 							...pick(foundUser, ["email", "username", "bio", "image"]),
 						},
 					};
@@ -130,7 +134,12 @@ const api = new Elysia({ prefix: "/api" })
 					}
 					return {
 						user: {
-							token: await sign(pick(createdUser, ["id", "email", "username"])),
+							token: await sign(
+								mapKeys(
+									pick(createdUser, ["id", "email", "username"]),
+									(key) => (key === "id" ? "uid" : key),
+								) as Record<"email" | "username", string> & { uid: number },
+							),
 							...pick(createdUser, ["email", "username", "bio", "image"]),
 						},
 					};
@@ -156,14 +165,18 @@ const api = new Elysia({ prefix: "/api" })
 					});
 				}
 				const user = await db.query.users.findFirst({
-					where: eq(users.id, (jwtDecodedPayload.id as number) ?? 0),
+					where: eq(users.id, jwtDecodedPayload.uid),
 				});
 				if (!user) {
 					throw new NotFoundError("user");
 				}
 				return {
 					user: {
-						token: await sign(pick(user, ["id", "email", "username"])),
+						token: await sign(
+							mapKeys(pick(user, ["id", "email", "username"]), (key) =>
+								key === "id" ? "uid" : key,
+							) as Record<"email" | "username", string> & { uid: number },
+						),
 						...pick(user, ["email", "username", "bio", "image"]),
 					},
 				};

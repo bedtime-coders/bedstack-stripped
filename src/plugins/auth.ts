@@ -1,12 +1,20 @@
 // Plugin for requiring authentication on routes
 
 import { RealWorldError } from "@/errors/realworld";
-import { jwt } from "@elysiajs/jwt";
 import env from "@env";
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { name } from "../../package.json";
+import jwt from "./jwt";
 import token from "./token";
+
+const JWTPayload = t.Object({
+	uid: t.Number(),
+	email: t.String(),
+	username: t.String(),
+});
+
+type JWTPayload = typeof JWTPayload.static;
 
 export const auth = () =>
 	new Elysia({
@@ -17,7 +25,8 @@ export const auth = () =>
 				name: "jwt",
 				secret: env.JWT_SECRET,
 				exp: "24h",
-				issuer: name,
+				iss: name,
+				// schema: JWTPayload,
 			}),
 		)
 		.use(token())
@@ -55,16 +64,18 @@ export const auth = () =>
 			// },
 		})
 		.derive({ as: "global" }, async ({ jwt, token }) => {
+			console.log(token);
 			const decoded = token ? await jwt.verify(token) : undefined;
+			console.log(decoded);
 			return {
 				auth: {
-					async sign(payload: Record<string, string | number>) {
+					async sign(payload: Omit<JWTPayload, "iat" | "iss">) {
 						return await jwt.sign({
 							...payload,
 							iat: Math.floor(Date.now() / 1000),
 						});
 					},
-					jwtDecodedPayload: decoded ?? undefined,
+					jwtDecodedPayload: decoded || undefined,
 				},
 			};
 		});
