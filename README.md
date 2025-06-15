@@ -12,7 +12,6 @@ Including:
 - [ElysiaJS](https://elysiajs.com) - HTTP Framework
 - [Drizzle](https://orm.drizzle.team) - ORM, Migrations, Seeding
 - [Biome](https://biomejs.dev) - Linter, Formatter
-- [ark.env](https://yam.codes/ark.env) - Typesafe Environment Variables
 
 ## Development
 
