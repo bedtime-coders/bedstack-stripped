@@ -65,18 +65,6 @@ const app = new Elysia()
 	.use(auth())
 	.get("/", ({ redirect }) => redirect("/swagger"))
 	.get("/v0/hello", () => "Hello Bedstack")
-	.post(
-		"/v0/users",
-		async ({ body }) => {
-			const user = await db.insert(users).values(body).returning();
-			return user;
-		},
-		{
-			body: t.Object({
-				name: t.String({ minLength: 2, examples: ["John Doe"] }),
-			}),
-		},
-	)
 	.group("api", (app) =>
 		app
 			.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), {
@@ -84,11 +72,31 @@ const app = new Elysia()
 			})
 			.post(
 				"/users",
-				async ({ body: { user }, auth: { sign } }) => {
+				async ({
+					body: {
+						user: { email, password, username, bio, image },
+					},
+					auth: { sign },
+				}) => {
+					const [createdUser] = await db
+						.insert(users)
+						.values({
+							email,
+							password: await Bun.password.hash(password),
+							username,
+							bio,
+							image,
+						})
+						.returning();
+					if (!createdUser) {
+						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+							user: ["was not created"],
+						});
+					}
 					return {
 						user: {
-							token: await sign(pick(user, ["email", "username"])),
-							...pick(user, ["email", "username", "bio", "image"]),
+							token: await sign(pick(createdUser, ["email", "id"])),
+							...pick(createdUser, ["email", "username", "bio", "image"]),
 						},
 					};
 				},
@@ -111,9 +119,7 @@ const app = new Elysia()
 									"must be at least 8 characters and contain uppercase, lowercase, and numbers",
 								examples: ["hunter2A"],
 							}),
-							username: t.Optional(
-								t.String({ minLength: 2, examples: ["jake"] }),
-							),
+							username: t.String({ minLength: 2, examples: ["jake"] }),
 							bio: t.Optional(
 								t.String({
 									minLength: 2,
