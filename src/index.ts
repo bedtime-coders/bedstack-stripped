@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import token from "@/plugins/token";
+import { auth } from "@/plugins/auth";
 import { users } from "@/schema";
 import { swagger } from "@elysiajs/swagger";
 import env from "@env";
@@ -25,7 +25,7 @@ const app = new Elysia()
 			exclude: ["/"],
 		}),
 	)
-	.use(token())
+	.use(auth())
 	.get("/", ({ redirect }) => redirect("/swagger"))
 	.get("/hello", () => "Hello Bedstack")
 	.post(
@@ -40,7 +40,9 @@ const app = new Elysia()
 			}),
 		},
 	)
-	.get("/token", ({ token }) => token)
+	.get("/token", ({ token }) => token, {
+		auth: true,
+	})
 	.listen(env.PORT);
 
 console.log(

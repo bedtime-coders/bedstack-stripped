@@ -56,10 +56,11 @@ export const token = (
 	}).derive(
 		{ as: "global" },
 		function deriveToken({ query, headers: { authorization } }) {
+			const prefix = `${header} `;
 			return {
 				get token() {
-					if ((authorization as string)?.startsWith(header))
-						return (authorization as string).slice(header.length + 1);
+					if ((authorization as string)?.startsWith(prefix))
+						return (authorization as string).slice(prefix.length);
 
 					const q = query[queryName];
 
