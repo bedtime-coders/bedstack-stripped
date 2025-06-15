@@ -22,6 +22,7 @@ const app = new Elysia()
 			set.status = error.status;
 			return pick(error, ["errors"]);
 		}
+
 		// Elysia validation errors (TypeBox based)
 		if (error instanceof ValidationError) {
 			return formatValidationError(error);
