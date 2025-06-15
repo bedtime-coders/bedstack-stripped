@@ -1,19 +1,13 @@
 import { db } from "@/db";
 import { RealWorldError } from "@/errors/realworld";
-import {
-	formatNotFoundError,
-	formatValidationError,
-	isElysiaError,
-} from "@/errors/utils";
 import { auth } from "@/plugins/auth";
+import { openapi } from "@/plugins/openapi";
 import { users } from "@/schema";
-import { swagger } from "@elysiajs/swagger";
 import env from "@env";
-import { Elysia, NotFoundError, ValidationError, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { pick } from "radashi";
-import { description, title } from "../package.json";
-import { DEFAULT_ERROR_MESSAGE } from "./consts";
+import { errors } from "./plugins/errors";
 
 const api = new Elysia({ prefix: "api" })
 	.use(auth())
@@ -75,56 +69,7 @@ const api = new Elysia({ prefix: "api" })
 		},
 	);
 
-const app = new Elysia()
-	.onError(({ error, code, set }) => {
-		// Manually thrown errors
-		if (error instanceof RealWorldError) {
-			set.status = error.status;
-			return pick(error, ["errors"]);
-		}
-
-		// Elysia validation errors (TypeBox based)
-		if (error instanceof ValidationError) {
-			return formatValidationError(error);
-		}
-
-		// Elysia not found errors
-		if (error instanceof NotFoundError) {
-			return formatNotFoundError(error);
-		}
-
-		// Generic error message
-		const reason = isElysiaError(error)
-			? error.response
-			: DEFAULT_ERROR_MESSAGE;
-		return {
-			errors: {
-				[code]: [reason],
-			},
-		};
-	})
-	.use(
-		swagger({
-			documentation: {
-				info: { title, version: "", description },
-				components: {
-					securitySchemes: {
-						tokenAuth: {
-							type: "apiKey",
-							description: 'Prefix the token with "Token", e.g. "Token xxxx"',
-							in: "header",
-							name: "Authorization",
-						},
-					},
-				},
-			},
-			exclude: ["/"],
-			scalarVersion: "1.31.10",
-		}),
-	)
-	.use(api)
-	.get("/", ({ redirect }) => redirect("/swagger"))
-	.listen(env.PORT);
+const app = new Elysia().use(errors).use(openapi).use(api).listen(env.PORT);
 
 console.log(
 	`🦊 Bedstack is running at http://${app.server?.hostname}:${app.server?.port}`,
