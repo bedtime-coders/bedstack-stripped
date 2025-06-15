@@ -15,6 +15,77 @@ import { pick } from "radashi";
 import { description, title } from "../package.json";
 import { DEFAULT_ERROR_MESSAGE } from "./consts";
 
+const api = new Elysia({ prefix: "api" })
+	.use(auth())
+	.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), { auth: true })
+	.post(
+		"/users",
+		async ({
+			body: {
+				user: { email, password, username, bio, image },
+			},
+			auth: { sign },
+		}) => {
+			const [createdUser] = await db
+				.insert(users)
+				.values({
+					email,
+					password: await Bun.password.hash(password),
+					username,
+					bio,
+					image,
+				})
+				.onConflictDoNothing()
+				.returning();
+			if (!createdUser) {
+				// TODO: consider selecting, and returning which field conflicted
+				throw new RealWorldError(StatusCodes.CONFLICT, {
+					user: ["already exists"],
+				});
+			}
+			return {
+				user: {
+					token: await sign(pick(createdUser, ["id", "email", "username"])),
+					...pick(createdUser, ["email", "username", "bio", "image"]),
+				},
+			};
+		},
+		{
+			detail: {
+				summary: "Registration",
+			},
+			body: t.Object({
+				user: t.Object({
+					email: t.String({
+						format: "email",
+						examples: ["jake@jake.jake"],
+					}),
+					password: t.String({
+						minLength: 8,
+						maxLength: 100,
+						pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
+						description:
+							"must be at least 8 characters and contain uppercase, lowercase, and numbers",
+						examples: ["hunter2A"],
+					}),
+					username: t.String({ minLength: 2, examples: ["jake"] }),
+					bio: t.Optional(
+						t.String({
+							minLength: 2,
+							examples: ["I work at statefarm"],
+						}),
+					),
+					image: t.Optional(
+						t.String({
+							format: "uri",
+							examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
+						}),
+					),
+				}),
+			}),
+		},
+	);
+
 const app = new Elysia()
 	.onError(({ error, code, set }) => {
 		// Manually thrown errors
@@ -62,85 +133,8 @@ const app = new Elysia()
 			scalarVersion: "1.31.10",
 		}),
 	)
-	.use(auth())
+	.use(api)
 	.get("/", ({ redirect }) => redirect("/swagger"))
-	.get("/v0/hello", () => "Hello Bedstack")
-	.group("api", (app) =>
-		app
-			.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), {
-				auth: true,
-			})
-			.post(
-				"/users",
-				async ({
-					body: {
-						user: { email, password, username, bio, image },
-					},
-					auth: { sign },
-				}) => {
-					const [createdUser] = await db
-						.insert(users)
-						.values({
-							email,
-							password: await Bun.password.hash(password),
-							username,
-							bio,
-							image,
-						})
-						.onConflictDoNothing()
-						.returning();
-					if (!createdUser) {
-						// TODO: consider selecting, and returning which field conflicted
-						throw new RealWorldError(StatusCodes.CONFLICT, {
-							user: ["already exists"],
-						});
-					}
-					return {
-						user: {
-							token: await sign(pick(createdUser, ["id", "email", "username"])),
-							...pick(createdUser, ["email", "username", "bio", "image"]),
-						},
-					};
-				},
-				{
-					detail: {
-						summary: "Registration",
-					},
-					body: t.Object({
-						user: t.Object({
-							email: t.String({
-								format: "email",
-								examples: ["jake@jake.jake"],
-							}),
-							password: t.String({
-								minLength: 8,
-								maxLength: 100,
-								pattern:
-									"^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
-								description:
-									"must be at least 8 characters and contain uppercase, lowercase, and numbers",
-								examples: ["hunter2A"],
-							}),
-							username: t.String({ minLength: 2, examples: ["jake"] }),
-							bio: t.Optional(
-								t.String({
-									minLength: 2,
-									examples: ["I work at statefarm"],
-								}),
-							),
-							image: t.Optional(
-								t.String({
-									format: "uri",
-									examples: [
-										"https://api.realworld.io/images/smiley-cyrus.jpg",
-									],
-								}),
-							),
-						}),
-					}),
-				},
-			),
-	)
 	.listen(env.PORT);
 
 console.log(
