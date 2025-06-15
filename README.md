@@ -28,7 +28,13 @@ Including:
    cp .env.example .env
    ```
 
-3. Start the server
+3. Push the database schema to the database
+
+   ```bash
+   bun db:push
+   ```
+
+4. Start the server
 
    ```bash
    bun dev
