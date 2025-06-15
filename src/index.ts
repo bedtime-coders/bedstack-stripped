@@ -87,15 +87,17 @@ const app = new Elysia()
 							bio,
 							image,
 						})
+						.onConflictDoNothing()
 						.returning();
 					if (!createdUser) {
-						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
-							user: ["was not created"],
+						// TODO: consider selecting, and returning which field conflicted
+						throw new RealWorldError(StatusCodes.CONFLICT, {
+							user: ["already exists"],
 						});
 					}
 					return {
 						user: {
-							token: await sign(pick(createdUser, ["email", "id"])),
+							token: await sign(pick(createdUser, ["id", "email", "username"])),
 							...pick(createdUser, ["email", "username", "bio", "image"]),
 						},
 					};
