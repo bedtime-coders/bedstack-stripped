@@ -1,7 +1,15 @@
-import ark, { port } from "ark.env";
+// TODO: switch to elysia-env
 
-export default ark.env({
-	DATABASE_URL: "string",
-	JWT_SECRET: "string",
-	PORT: port.default("3000"),
-});
+import { t } from "elysia";
+import { parseEnv } from "typebox-env";
+
+export default parseEnv(
+	t.Object({
+		DATABASE_URL: t.String(),
+		JWT_SECRET: t.String(),
+		PORT: t.Number({
+			default: 3000,
+		}),
+	}),
+	process.env,
+);
