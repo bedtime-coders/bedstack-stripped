@@ -1,19 +1,31 @@
 import { db } from "@/db";
+import token from "@/plugins/token";
+import { users } from "@/schema";
 import { swagger } from "@elysiajs/swagger";
 import env from "@env";
 import { Elysia, t } from "elysia";
 import { description, title } from "../package.json";
-import { users } from "./schema";
 
 const app = new Elysia()
 	.use(
 		swagger({
 			documentation: {
 				info: { title, version: "", description },
+				components: {
+					securitySchemes: {
+						tokenAuth: {
+							type: "apiKey",
+							description: 'Prefix the token with "Token", e.g. "Token xxxx"',
+							in: "header",
+							name: "Authorization",
+						},
+					},
+				},
 			},
 			exclude: ["/"],
 		}),
 	)
+	.use(token())
 	.get("/", ({ redirect }) => redirect("/swagger"))
 	.get("/hello", () => "Hello Bedstack")
 	.post(
@@ -28,6 +40,7 @@ const app = new Elysia()
 			}),
 		},
 	)
+	.get("/token", ({ token }) => token)
 	.listen(env.PORT);
 
 console.log(

@@ -1,6 +1,6 @@
-# Bedstack Simple
+# Bedstack (Stripped)
 
-⚡ Simple version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping.
+⚡ Stripped version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping.
 
 ## Bedstack
 
