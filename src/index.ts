@@ -54,11 +54,27 @@ const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 				}),
 				response: t.Object({
 					user: t.Object({
-						email: t.String(),
-						token: t.String(),
-						username: t.String(),
-						bio: t.Union([t.String(), t.Null()]),
-						image: t.Union([t.String(), t.Null()]),
+						email: t.String({
+							examples: ["jake@jake.jake"],
+						}),
+						token: t.String({
+							examples: [
+								"eyJhbGciOiJIUzI1NiJ9.eyJpc3N1ZXIiOiJiZWRzdGFjay1zdHJpcHBlZCIsImlkIjoxMiwiZW1haWwiOiJqYWtlQGpha2UuamFrZTIiLCJ1c2VybmFtZSI6Impha2UyIiwiaWF0IjoxNzUwMDE2MDU0fQ.j_2URjoIZ6yJtpfNh21g4tvLdejCjcY-ot_7fq3wwTM",
+							],
+						}),
+						username: t.String({
+							examples: ["jake"],
+						}),
+						bio: t.Union([
+							t.String({ examples: ["I work at statefarm"] }),
+							t.Null(),
+						]),
+						image: t.Union([
+							t.String({
+								examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
+							}),
+							t.Null(),
+						]),
 					}),
 				}),
 			},
@@ -120,11 +136,29 @@ const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 				}),
 				response: t.Object({
 					user: t.Object({
-						email: t.String(),
-						token: t.String(),
-						username: t.String(),
-						bio: t.Union([t.String(), t.Null()]),
-						image: t.Union([t.String(), t.Null()]),
+						email: t.String({
+							examples: ["jake@jake.jake"],
+						}),
+						token: t.String({
+							examples: [
+								"eyJhbGciOiJIUzI1NiJ9.eyJpc3N1ZXIiOiJiZWRzdGFjay1zdHJpcHBlZCIsImlkIjoxMiwiZW1haWwiOiJqYWtlQGpha2UuamFrZTIiLCJ1c2VybmFtZSI6Impha2UyIiwiaWF0IjoxNzUwMDE2MDU0fQ.j_2URjoIZ6yJtpfNh21g4tvLdejCjcY-ot_7fq3wwTM",
+							],
+						}),
+						username: t.String({
+							examples: ["jake"],
+						}),
+						bio: t.Union([
+							t.String({
+								examples: ["I work at statefarm"],
+							}),
+							t.Null(),
+						]),
+						image: t.Union([
+							t.String({
+								examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
+							}),
+							t.Null(),
+						]),
 					}),
 				}),
 			},
