@@ -1,26 +1,66 @@
 // Plugin for requiring authentication on routes
 
 import { RealWorldError } from "@/errors/realworld";
+import { jwt } from "@elysiajs/jwt";
+import env from "@env";
 import Elysia from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { name } from "../../package.json";
 import token from "./token";
 
 export const auth = () =>
 	new Elysia({
 		name: "ElysiaJS auth plugin",
 	})
+		.use(
+			jwt({
+				name: "jwt",
+				secret: env.JWT_SECRET,
+				exp: "24h",
+				issuer: name,
+			}),
+		)
 		.use(token())
 		.macro({
 			auth() {
 				return {
-					beforeHandle({ token }) {
+					async beforeHandle({ token, jwt }) {
 						if (!token) {
 							throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-								// TODO: separate error messages for missing and invalid token
-								token: ["is missing or invalid"],
+								token: [
+									"is missing or malformed - must be provided in Authorization header with 'Token ' prefix, e.g. 'Token ey...'",
+								],
+							});
+						}
+						const verifyResult = await jwt.verify(token);
+						if (!verifyResult) {
+							throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
+								token: ["is expired, malformed, or invalid"],
 							});
 						}
 					},
 				};
 			},
-		});
+			// sign: {
+			// 	async resolve({ jwt, body }) {
+			// 		const signed = await jwt.sign({
+			// 			body,
+			// 			iat: Math.floor(Date.now() / 1000),
+			// 		});
+			// 		console.log(signed);
+			// 		return {
+			// 			token: signed,
+			// 		};
+			// 	},
+			// },
+		})
+		.derive({ as: "global" }, ({ jwt }) => ({
+			auth: {
+				async sign(payload: Record<string, string | number>) {
+					return await jwt.sign({
+						...payload,
+						iat: Math.floor(Date.now() / 1000),
+					});
+				},
+			},
+		}));
