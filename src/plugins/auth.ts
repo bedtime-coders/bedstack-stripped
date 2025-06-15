@@ -26,7 +26,7 @@ export const auth = () =>
 				secret: env.JWT_SECRET,
 				exp: "24h",
 				iss: name,
-				// schema: JWTPayload,
+				schema: JWTPayload,
 			}),
 		)
 		.use(token())
