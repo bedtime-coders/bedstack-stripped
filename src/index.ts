@@ -79,7 +79,7 @@ const usersModel = new Elysia().model({
 });
 
 const api = new Elysia({ prefix: "/api" })
-	.use(auth())
+	.use(auth)
 	.group("/users", (app) =>
 		app
 			.use(usersModel)
@@ -156,8 +156,8 @@ const api = new Elysia({ prefix: "/api" })
 	.group("/user", (app) =>
 		app.use(usersModel).get(
 			"/",
-			async ({ auth: { jwtDecodedPayload, sign } }) => {
-				if (!jwtDecodedPayload) {
+			async ({ auth: { sign, jwtPayload } }) => {
+				if (!jwtPayload) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
 						token: [
 							"is missing or malformed - must be provided in Authorization header with 'Token ' prefix, e.g. 'Token jwt.token.here'",
@@ -165,7 +165,7 @@ const api = new Elysia({ prefix: "/api" })
 					});
 				}
 				const user = await db.query.users.findFirst({
-					where: eq(users.id, jwtDecodedPayload.uid),
+					where: eq(users.id, jwtPayload.uid),
 				});
 				if (!user) {
 					throw new NotFoundError("user");
