@@ -1,13 +1,6 @@
 # Bedstack Simple
 
-⚡ Simple version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping 
-
-## Getting Started
-
-1. Clone the repository / Click "Use this template"
-2. Find-and-replace "bedstack-simple" with your project name
-3. Find-and-replace "Bedstack Simple" with your Bedstack Simple
-4. Remove this section.
+⚡ Simple version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping.
 
 ## Bedstack
 
