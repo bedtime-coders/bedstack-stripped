@@ -77,49 +77,61 @@ const app = new Elysia()
 			}),
 		},
 	)
-	.get("/api/auth", ({ status }) => status(StatusCodes.NO_CONTENT), {
-		auth: true,
-	})
-	.post(
-		"/api/users",
-		async ({ body: { user }, auth: { sign } }) => {
-			return {
-				user: {
-					token: await sign(pick(user, ["email", "username"])),
-					...pick(user, ["email", "username", "bio", "image"]),
+	.group("api", (app) =>
+		app
+			.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), {
+				auth: true,
+			})
+			.post(
+				"/users",
+				async ({ body: { user }, auth: { sign } }) => {
+					return {
+						user: {
+							token: await sign(pick(user, ["email", "username"])),
+							...pick(user, ["email", "username", "bio", "image"]),
+						},
+					};
 				},
-			};
-		},
-		{
-			body: t.Object({
-				user: t.Object({
-					email: t.String({
-						format: "email",
-						examples: ["jake@jake.jake"],
-					}),
-					password: t.String({
-						minLength: 8,
-						maxLength: 100,
-						pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
-						description:
-							"must be at least 8 characters and contain uppercase, lowercase, and numbers",
-					}),
-					username: t.Optional(t.String({ minLength: 2, examples: ["jake"] })),
-					bio: t.Optional(
-						t.String({
-							minLength: 2,
-							examples: ["I work at statefarm"],
+				{
+					detail: {
+						summary: "Registration",
+					},
+					body: t.Object({
+						user: t.Object({
+							email: t.String({
+								format: "email",
+								examples: ["jake@jake.jake"],
+							}),
+							password: t.String({
+								minLength: 8,
+								maxLength: 100,
+								pattern:
+									"^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
+								description:
+									"must be at least 8 characters and contain uppercase, lowercase, and numbers",
+								examples: ["hunter2A"],
+							}),
+							username: t.Optional(
+								t.String({ minLength: 2, examples: ["jake"] }),
+							),
+							bio: t.Optional(
+								t.String({
+									minLength: 2,
+									examples: ["I work at statefarm"],
+								}),
+							),
+							image: t.Optional(
+								t.String({
+									format: "uri",
+									examples: [
+										"https://api.realworld.io/images/smiley-cyrus.jpg",
+									],
+								}),
+							),
 						}),
-					),
-					image: t.Optional(
-						t.String({
-							format: "uri",
-							examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
-						}),
-					),
-				}),
-			}),
-		},
+					}),
+				},
+			),
 	)
 	.listen(env.PORT);
 
