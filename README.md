@@ -1,12 +1,12 @@
-# Project Title
+   # Bedstack Simple
 
 A [Bedstack](https://github.com/bedtime-coders/bedstack) application.
 
 ## Getting Started
 
 1. Clone the repository / Click "Use this template"
-2. Find-and-replace "project-name" with your project name
-3. Find-and-replace "Project Title" with your project title
+2. Find-and-replace "bedstack-simple" with your project name
+3. Find-and-replace "Bedstack Simple" with your Bedstack Simple
 4. Remove this section.
 
 ## Bedstack

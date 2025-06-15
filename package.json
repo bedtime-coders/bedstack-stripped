@@ -1,7 +1,7 @@
 {
-	"name": "project-name",
-	"title": "Project Title",
-	"description": "A Bedstack application",
+	"name": "bedstack-simple",
+	"title": "Bedstack Simple",
+	"description": "Simple version of Bedstack for rapid prototyping",
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
