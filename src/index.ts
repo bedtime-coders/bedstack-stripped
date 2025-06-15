@@ -52,6 +52,15 @@ const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 						}),
 					}),
 				}),
+				response: t.Object({
+					user: t.Object({
+						email: t.String(),
+						token: t.String(),
+						username: t.String(),
+						bio: t.Union([t.String(), t.Null()]),
+						image: t.Union([t.String(), t.Null()]),
+					}),
+				}),
 			},
 		)
 		.post(
@@ -107,6 +116,15 @@ const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 								examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
 							}),
 						),
+					}),
+				}),
+				response: t.Object({
+					user: t.Object({
+						email: t.String(),
+						token: t.String(),
+						username: t.String(),
+						bio: t.Union([t.String(), t.Null()]),
+						image: t.Union([t.String(), t.Null()]),
 					}),
 				}),
 			},
