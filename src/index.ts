@@ -4,14 +4,56 @@ import { auth } from "@/plugins/auth";
 import { openapi } from "@/plugins/openapi";
 import { users } from "@/schema";
 import env from "@env";
-import { Elysia, t } from "elysia";
+import { eq } from "drizzle-orm";
+import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { pick } from "radashi";
 import { errors } from "./plugins/errors";
 
 const api = new Elysia({ prefix: "api" })
 	.use(auth())
-	.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), { auth: true })
+	.post(
+		"/users/login",
+		async ({ body: { user }, auth: { sign } }) => {
+			const [foundUser] = await db
+				.select()
+				.from(users)
+				.where(eq(users.email, user.email))
+				.limit(1);
+			if (!foundUser) {
+				throw new NotFoundError("user");
+			}
+			if (!(await Bun.password.verify(user.password, foundUser.password))) {
+				throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
+					user: ["invalid credentials"],
+				});
+			}
+			return {
+				user: {
+					token: await sign(pick(foundUser, ["id", "email", "username"])),
+					...pick(foundUser, ["email", "username", "bio", "image"]),
+				},
+			};
+		},
+		{
+			detail: {
+				summary: "Authentication",
+			},
+			body: t.Object({
+				user: t.Object({
+					email: t.String({
+						format: "email",
+						minLength: 1,
+						examples: ["jake@jake.jake"],
+					}),
+					password: t.String({
+						minLength: 1,
+						examples: ["hunter2A"],
+					}),
+				}),
+			}),
+		},
+	)
 	.post(
 		"/users",
 		async ({ body: { user }, auth: { sign } }) => {

@@ -28,7 +28,7 @@ export const auth = () =>
 						if (!token) {
 							throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
 								token: [
-									"is missing or malformed - must be provided in Authorization header with 'Token ' prefix, e.g. 'Token ey...'",
+									"is missing or malformed - must be provided in Authorization header with 'Token ' prefix, e.g. 'Token jwt.token.here'",
 								],
 							});
 						}

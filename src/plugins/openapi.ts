@@ -16,7 +16,8 @@ export const openapi = new Elysia()
 					securitySchemes: {
 						tokenAuth: {
 							type: "apiKey",
-							description: 'Prefix the token with "Token", e.g. "Token xxxx"',
+							description:
+								'Prefix the token with "Token ", e.g. "Token jwt.token.here"',
 							in: "header",
 							name: "Authorization",
 						},
