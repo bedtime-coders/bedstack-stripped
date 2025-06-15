@@ -1,6 +1,6 @@
-   # Bedstack Simple
+# Bedstack Simple
 
-A [Bedstack](https://github.com/bedtime-coders/bedstack) application.
+⚡ Simple version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping 
 
 ## Getting Started
 
