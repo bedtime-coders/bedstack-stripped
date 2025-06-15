@@ -20,21 +20,10 @@ const api = new Elysia({ prefix: "api" })
 	.get("/auth", ({ status }) => status(StatusCodes.NO_CONTENT), { auth: true })
 	.post(
 		"/users",
-		async ({
-			body: {
-				user: { email, password, username, bio, image },
-			},
-			auth: { sign },
-		}) => {
+		async ({ body: { user }, auth: { sign } }) => {
 			const [createdUser] = await db
 				.insert(users)
-				.values({
-					email,
-					password: await Bun.password.hash(password),
-					username,
-					bio,
-					image,
-				})
+				.values(user)
 				.onConflictDoNothing()
 				.returning();
 			if (!createdUser) {
