@@ -173,6 +173,7 @@ const api = new Elysia({ prefix: "/api" })
 					summary: "Get Current User",
 				},
 				response: "UserResponse",
+				auth: true,
 			},
 		),
 	);
