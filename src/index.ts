@@ -9,6 +9,7 @@ import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { pick } from "radashi";
 import { errors } from "./plugins/errors";
+import chalk from "chalk";
 
 const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 	app
@@ -146,5 +147,5 @@ const api = new Elysia({ prefix: "/api" }).use(auth()).group("/users", (app) =>
 const app = new Elysia().use(errors).use(openapi).use(api).listen(env.PORT);
 
 console.log(
-	`🦊 Bedstack is running at http://${app.server?.hostname}:${app.server?.port}`,
+	`Bedstack is up and running on ${chalk.blue(`http://${app.server?.hostname}:${app.server?.port}`)}`,
 );
