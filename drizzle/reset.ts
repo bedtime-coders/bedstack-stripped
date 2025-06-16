@@ -1,8 +1,8 @@
+import { env } from "@/core/env";
 import { users } from "@/users/users.schema";
 import chalk from "chalk";
-import { reset } from "drizzle-seed";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { env } from "@/core/env";
+import { reset } from "drizzle-seed";
 
 console.log(chalk.gray("Resetting database"));
 // See: https://github.com/drizzle-team/drizzle-orm/issues/3599
