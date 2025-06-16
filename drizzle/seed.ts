@@ -1,7 +1,7 @@
 import { exit } from "node:process";
 import { parseArgs } from "node:util";
 import { env } from "@/core/env";
-import { users } from "@/schema";
+import { users } from "@/users/users.schema";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { reset, seed } from "drizzle-seed";
 

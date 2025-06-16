@@ -1,5 +1,4 @@
 import { db } from "@/core/db";
-import { users } from "@/schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { eq } from "drizzle-orm";
@@ -7,6 +6,7 @@ import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { toResponse } from "./mappers";
 import { usersModel } from "./users.model";
+import { users } from "./users.schema";
 
 export const usersPlugin = new Elysia()
 	.use(auth)
