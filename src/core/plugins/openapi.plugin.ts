@@ -17,10 +17,10 @@ export const openapi = new Elysia()
 				components: {
 					securitySchemes: {
 						tokenAuth: {
-							type: "apiKey" as const,
+							type: "apiKey",
 							description:
 								'Prefix the token with "Token ", e.g. "Token jwt.token.here"',
-							in: "header" as const,
+							in: "header",
 							name: "Authorization",
 						},
 					},
