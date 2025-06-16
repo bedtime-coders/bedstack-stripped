@@ -1,13 +1,15 @@
+import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { description, title } from "../../package.json";
 
 const paths = {
-	swaggerUi: "/docs",
-	json: "/openapi.json", // TODO: add a route to serve the json
+	scalar: "/docs",
+	json: "/openapi.json",
 };
 
 export const openapi = new Elysia()
+	.use(staticPlugin())
 	.use(
 		swagger({
 			documentation: {
@@ -15,10 +17,10 @@ export const openapi = new Elysia()
 				components: {
 					securitySchemes: {
 						tokenAuth: {
-							type: "apiKey",
+							type: "apiKey" as const,
 							description:
 								'Prefix the token with "Token ", e.g. "Token jwt.token.here"',
-							in: "header",
+							in: "header" as const,
 							name: "Authorization",
 						},
 					},
@@ -26,7 +28,11 @@ export const openapi = new Elysia()
 			},
 			exclude: ["/"],
 			scalarVersion: "1.31.10",
-			path: paths.swaggerUi,
+			path: paths.scalar,
+			specPath: paths.json,
+			scalarConfig: {
+				favicon: "/public/icon-dark.svg",
+			},
 		}),
 	)
-	.get("/", ({ redirect }) => redirect(paths.swaggerUi));
+	.get("/", ({ redirect }) => redirect(paths.scalar));
