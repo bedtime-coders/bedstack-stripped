@@ -1,8 +1,12 @@
 import { exit } from "node:process";
 import { parseArgs } from "node:util";
-import { db } from "@/db";
+import { env } from "@/env";
 import { users } from "@/schema";
+import { drizzle } from "drizzle-orm/bun-sqlite";
 import { reset, seed } from "drizzle-seed";
+
+// See: https://github.com/drizzle-team/drizzle-orm/issues/3599
+const db = drizzle(env.DATABASE_URL);
 
 const { values } = parseArgs({
 	args: Bun.argv,
@@ -14,15 +18,12 @@ const { values } = parseArgs({
 });
 
 if (values.reset) {
-	const nodeEnv = process.env.NODE_ENV;
-	if (!nodeEnv || !["development", "test"].includes(nodeEnv)) {
+	if (env.NODE_ENV === "production") {
 		console.error(
 			"❌ Database reset is only allowed in development or test environments.",
 		);
-		console.error("Current NODE_ENV:", nodeEnv || "not set");
 		exit(1);
 	}
-
 	console.log("🔄 Resetting database...");
 	await reset(db, {
 		users,

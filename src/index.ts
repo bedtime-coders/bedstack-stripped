@@ -1,10 +1,10 @@
 import { db } from "@/db";
+import { env } from "@/env";
 import { RealWorldError } from "@/errors/realworld";
 import { auth } from "@/plugins/auth";
 import { errors } from "@/plugins/errors";
 import { openapi } from "@/plugins/openapi";
 import { users } from "@/schema";
-import env from "@env";
 import chalk from "chalk";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";

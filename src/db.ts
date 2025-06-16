@@ -1,6 +1,6 @@
-import env from "@env";
+import { env } from "@/env";
+import { users } from "@/schema";
 import { drizzle } from "drizzle-orm/bun-sqlite";
-import { users } from "./schema";
 
 export const db = drizzle(env.DATABASE_URL, {
 	schema: {

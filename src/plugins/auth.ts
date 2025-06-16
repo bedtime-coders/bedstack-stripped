@@ -1,5 +1,5 @@
+import { env } from "@/env";
 import { RealWorldError } from "@/errors/realworld";
-import env from "@env";
 import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { name } from "../../package.json";
