@@ -3,8 +3,8 @@ import { RealWorldError } from "@/shared/errors";
 import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { name } from "../../../package.json";
-import jwt from "./jwt";
-import { token } from "./token";
+import jwt from "./jwt.plugin";
+import { token } from "./token.plugin";
 
 const JwtPayload = t.Object({
 	uid: t.Number(),

@@ -1,5 +1,8 @@
 import { errors, openapi } from "@/core/plugins";
+import { usersPlugin } from "@/users/users.plugin";
 import { Elysia } from "elysia";
-import { api } from "./api";
 
-export const app = new Elysia().use(errors).use(openapi).use(api);
+export const app = new Elysia()
+	.use(errors)
+	.use(openapi)
+	.group("/api", (app) => app.use(usersPlugin));

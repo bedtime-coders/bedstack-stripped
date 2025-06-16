@@ -1,3 +1,3 @@
-export * from "./auth";
-export * from "./jwt";
-export * from "./token";
+export * from "./auth.plugin";
+export * from "./jwt.plugin";
+export * from "./token.plugin";

@@ -1,3 +1,3 @@
-export * from "./env";
-export * from "./errors";
-export * from "./openapi";
+export * from "./env.plugin";
+export * from "./errors.plugin";
+export * from "./openapi.plugin";
