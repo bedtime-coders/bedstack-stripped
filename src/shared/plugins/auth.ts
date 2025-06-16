@@ -41,7 +41,7 @@ export const auth = new Elysia()
 				if (!token) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
 						token: [
-							"is missing. Authorization header is required in the form: 'Token <token>'",
+							"is required. Please provide an Authorization header in the form: 'Token <token>'",
 						],
 					});
 				}
