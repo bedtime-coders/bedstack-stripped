@@ -42,6 +42,19 @@ export const usersPlugin = new Elysia()
 			.post(
 				"/",
 				async ({ body: { user }, auth: { sign } }) => {
+					await assertNoConflicts(
+						"user",
+						{
+							email: user.email,
+							username: user.username,
+						},
+						async (key, value) => {
+							const existing = await db.query.users.findFirst({
+								where: eq(users[key], value),
+							});
+							return Boolean(existing);
+						},
+					);
 					const [createdUser] = await db
 						.insert(users)
 						.values({
@@ -51,8 +64,8 @@ export const usersPlugin = new Elysia()
 						.onConflictDoNothing()
 						.returning();
 					if (!createdUser) {
-						throw new RealWorldError(StatusCodes.CONFLICT, {
-							user: ["already exists"],
+						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+							user: ["failed to create"],
 						});
 					}
 					return toResponse(createdUser, sign);
@@ -120,7 +133,9 @@ export const usersPlugin = new Elysia()
 						.where(eq(users.id, jwtPayload.uid))
 						.returning();
 					if (!updatedUser) {
-						throw new NotFoundError("user");
+						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+							user: ["failed to update"],
+						});
 					}
 					return toResponse(updatedUser, sign);
 				},
