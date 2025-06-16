@@ -129,7 +129,10 @@ export const api = new Elysia({ prefix: "/api" })
 				async ({ body: { user }, auth: { sign } }) => {
 					const [createdUser] = await db
 						.insert(users)
-						.values(user)
+						.values({
+							...user,
+							password: await Bun.password.hash(user.password),
+						})
 						.onConflictDoNothing()
 						.returning();
 					if (!createdUser) {
