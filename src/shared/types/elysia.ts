@@ -3,7 +3,7 @@
  * @example
  * ```ts
  * const { models } = usersModel;
- * type UserResponse = ModelsStatic<typeof models>["UserResponse"];
+ * type User = ModelsStatic<typeof models>["User"];
  * ```
  */
 type SchemaWithStatic = { static: unknown };

@@ -7,7 +7,7 @@ import type { users } from "../users.schema";
 export const toResponse = async (
 	user: InferSelectModel<typeof users>,
 	sign: SignFn,
-): Promise<ModelsStatic<typeof usersModel.models>["UserResponse"]> => {
+): Promise<ModelsStatic<typeof usersModel.models>["User"]> => {
 	const { email, username, bio, image } = user;
 	return {
 		user: {

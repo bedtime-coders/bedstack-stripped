@@ -45,7 +45,7 @@ export const usersModel = new Elysia().model({
 		}),
 	}),
 	CreateUser,
-	UserResponse: t.Object({
+	User: t.Object({
 		user: t.Object({
 			email: t.String({
 				examples: ["jake@jake.jake"],

@@ -32,10 +32,11 @@ export const usersPlugin = new Elysia()
 				{
 					detail: {
 						summary: "Authentication",
-						description: "No authentication required, returns a User",
+						description:
+							"No authentication required, returns a [User](docs#model/user)",
 					},
 					body: "LoginUser",
-					response: "UserResponse",
+					response: "User",
 				},
 			)
 			.post(
@@ -59,10 +60,11 @@ export const usersPlugin = new Elysia()
 				{
 					detail: {
 						summary: "Registration",
-						description: "No authentication required, returns a User",
+						description:
+							"No authentication required, returns a [User](docs#model/user)",
 					},
 					body: "CreateUser",
-					response: "UserResponse",
+					response: "User",
 				},
 			),
 	)
@@ -84,10 +86,10 @@ export const usersPlugin = new Elysia()
 					detail: {
 						summary: "Get Current User",
 						description:
-							"Authentication required, returns a User that’s the current user",
+							"Authentication required, returns a [User](docs#model/user) that’s the current user",
 						security: [{ tokenAuth: [] }],
 					},
-					response: "UserResponse",
+					response: "User",
 					auth: true,
 				},
 			)
@@ -122,11 +124,12 @@ export const usersPlugin = new Elysia()
 				{
 					detail: {
 						summary: "Update User",
-						description: "Authentication required, returns the updated User",
+						description:
+							"Authentication required, returns the updated [User](docs#model/user)",
 						security: [{ tokenAuth: [] }],
 					},
 					body: "UpdateUser",
-					response: "UserResponse",
+					response: "User",
 					auth: true,
 				},
 			),
