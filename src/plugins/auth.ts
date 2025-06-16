@@ -38,13 +38,15 @@ export const auth = new Elysia()
 			async resolve({ jwt, token, auth }) {
 				if (!token) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-						token: ["Missing Authorization header"],
+						token: [
+							"is missing. Authorization header is required in the form: 'Token <token>'",
+						],
 					});
 				}
 				const jwtPayload = await jwt.verify(token);
 				if (!jwtPayload) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-						token: ["Invalid or expired token"],
+						token: ["is invalid, expired, or malformed"],
 					});
 				}
 				return { auth: { ...auth, jwtPayload } };
