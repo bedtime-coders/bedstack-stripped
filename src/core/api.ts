@@ -1,7 +1,7 @@
 import { db } from "@/core/db";
 import { users } from "@/schema";
 import { RealWorldError } from "@/shared/errors";
-import { auth } from "@/shared/plugins";
+import { type SignFn, auth } from "@/shared/plugins";
 import type { ModelsStatic } from "@/shared/types/elysia";
 import { type InferSelectModel, eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
@@ -78,12 +78,6 @@ const usersModel = new Elysia().model({
 		user: t.Partial(CreateUser.properties.user),
 	}),
 });
-
-type SignFn = (payload: {
-	uid: number;
-	email: string;
-	username: string;
-}) => Promise<string>;
 
 const toUserResponse = async (
 	user: InferSelectModel<typeof users>,

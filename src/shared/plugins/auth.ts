@@ -14,6 +14,8 @@ const JwtPayload = t.Object({
 
 type JwtPayload = typeof JwtPayload.static;
 
+export type SignFn = (payload: JwtPayload) => Promise<string>;
+
 export const auth = new Elysia()
 	.use(
 		jwt({
@@ -26,11 +28,11 @@ export const auth = new Elysia()
 	.use(token())
 	.derive({ as: "global" }, ({ jwt }) => ({
 		auth: {
-			sign: (jwtPayload: JwtPayload) =>
+			sign: ((jwtPayload) =>
 				jwt.sign({
 					...jwtPayload,
 					iat: Math.floor(Date.now() / 1000),
-				}),
+				})) satisfies SignFn,
 		},
 	}))
 	.macro({
