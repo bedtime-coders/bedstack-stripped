@@ -1,5 +1,5 @@
 import { db } from "@/core/db";
-import { RealWorldError } from "@/shared/errors";
+import { RealWorldError, assertNoConflicts } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
@@ -86,7 +86,7 @@ export const usersPlugin = new Elysia()
 					detail: {
 						summary: "Get Current User",
 						description:
-							"Authentication required, returns a [User](docs#model/user) that’s the current user",
+							"Authentication required, returns a [User](docs#model/user) that's the current user",
 						security: [{ tokenAuth: [] }],
 					},
 					response: "User",
@@ -96,30 +96,33 @@ export const usersPlugin = new Elysia()
 			.put(
 				"/",
 				async ({ body: { user }, auth: { sign, jwtPayload } }) => {
-					try {
-						const [updatedUser] = await db
-							.update(users)
-							.set({
-								...user,
-								password: user?.password
-									? await Bun.password.hash(user.password)
-									: undefined,
-							})
-							.where(eq(users.id, jwtPayload.uid))
-							.returning();
-						if (!updatedUser) {
-							throw new NotFoundError("user");
-						}
-						return toResponse(updatedUser, sign);
-					} catch (error) {
-						console.error(error);
-						if (error instanceof RealWorldError) {
-							throw error;
-						}
-						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
-							user: ["internal server error"],
-						});
+					await assertNoConflicts(
+						"user",
+						{
+							email: user.email,
+							username: user.username,
+						},
+						async (key, value) => {
+							const existing = await db.query.users.findFirst({
+								where: eq(users[key], value),
+							});
+							return Boolean(existing && existing.id !== jwtPayload.uid);
+						},
+					);
+					const [updatedUser] = await db
+						.update(users)
+						.set({
+							...user,
+							password: user?.password
+								? await Bun.password.hash(user.password)
+								: undefined,
+						})
+						.where(eq(users.id, jwtPayload.uid))
+						.returning();
+					if (!updatedUser) {
+						throw new NotFoundError("user");
 					}
+					return toResponse(updatedUser, sign);
 				},
 				{
 					detail: {
