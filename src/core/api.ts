@@ -2,10 +2,10 @@ import { db } from "@/core/db";
 import { users } from "@/schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
-import { eq } from "drizzle-orm";
+import type { ModelsStatic } from "@/shared/types/elysia";
+import { type InferSelectModel, eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { mapKeys, pick } from "radashi";
 
 const usersModel = new Elysia().model({
 	LoginUser: t.Object({
@@ -74,6 +74,28 @@ const usersModel = new Elysia().model({
 	}),
 });
 
+type SignFn = (payload: {
+	uid: number;
+	email: string;
+	username: string;
+}) => Promise<string>;
+
+const toUserResponse = async (
+	user: InferSelectModel<typeof users>,
+	sign: SignFn,
+): Promise<ModelsStatic<typeof usersModel.models>["UserResponse"]> => {
+	const { email, username, bio, image } = user;
+	return {
+		user: {
+			token: await sign({ uid: user.id, email, username }),
+			email,
+			username,
+			bio,
+			image,
+		},
+	};
+};
+
 export const api = new Elysia({ prefix: "/api" })
 	.use(auth)
 	.group("/users", (app) =>
@@ -82,11 +104,9 @@ export const api = new Elysia({ prefix: "/api" })
 			.post(
 				"/login",
 				async ({ body: { user }, auth: { sign } }) => {
-					const [foundUser] = await db
-						.select()
-						.from(users)
-						.where(eq(users.email, user.email))
-						.limit(1);
+					const foundUser = await db.query.users.findFirst({
+						where: eq(users.email, user.email),
+					});
 					if (!foundUser) {
 						throw new NotFoundError("user");
 					}
@@ -95,16 +115,7 @@ export const api = new Elysia({ prefix: "/api" })
 							user: ["invalid credentials"],
 						});
 					}
-					return {
-						user: {
-							token: await sign(
-								mapKeys(pick(foundUser, ["id", "email", "username"]), (key) =>
-									key === "id" ? "uid" : key,
-								) as Record<"email" | "username", string> & { uid: number },
-							),
-							...pick(foundUser, ["email", "username", "bio", "image"]),
-						},
-					};
+					return toUserResponse(foundUser, sign);
 				},
 				{
 					detail: {
@@ -128,17 +139,7 @@ export const api = new Elysia({ prefix: "/api" })
 							user: ["already exists"],
 						});
 					}
-					return {
-						user: {
-							token: await sign(
-								mapKeys(
-									pick(createdUser, ["id", "email", "username"]),
-									(key) => (key === "id" ? "uid" : key),
-								) as Record<"email" | "username", string> & { uid: number },
-							),
-							...pick(createdUser, ["email", "username", "bio", "image"]),
-						},
-					};
+					return toUserResponse(createdUser, sign);
 				},
 				{
 					detail: {
@@ -159,16 +160,7 @@ export const api = new Elysia({ prefix: "/api" })
 				if (!user) {
 					throw new NotFoundError("user");
 				}
-				return {
-					user: {
-						token: await sign(
-							mapKeys(pick(user, ["id", "email", "username"]), (key) =>
-								key === "id" ? "uid" : key,
-							) as Record<"email" | "username", string> & { uid: number },
-						),
-						...pick(user, ["email", "username", "bio", "image"]),
-					},
-				};
+				return toUserResponse(user, sign);
 			},
 			{
 				detail: {
