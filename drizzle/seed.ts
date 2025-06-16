@@ -2,6 +2,7 @@ import { exit } from "node:process";
 import { parseArgs } from "node:util";
 import { env } from "@/core/env";
 import { users } from "@/users/users.schema";
+import chalk from "chalk";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import { reset, seed } from "drizzle-seed";
 
@@ -24,17 +25,17 @@ if (values.reset) {
 		);
 		exit(1);
 	}
-	console.log("🔄 Resetting database...");
+	console.log(chalk.gray("Resetting database"));
 	await reset(db, {
 		users,
 	});
-	console.log("✅ Database reset complete.");
+	console.log(`[${chalk.green("✓")}] Database reset complete`);
 }
 
-console.log("🔄 Seeding database...");
+console.log(chalk.gray("Seeding database"));
 await seed(db, {
 	users,
 });
-console.log("✅ Database seeded.");
+console.log(`[${chalk.green("✓")}] Database seeded`);
 
 exit(0);
