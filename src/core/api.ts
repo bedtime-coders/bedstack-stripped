@@ -7,6 +7,36 @@ import { type InferSelectModel, eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 
+const CreateUser = t.Object({
+	user: t.Object({
+		email: t.String({
+			format: "email",
+			examples: ["jake@jake.jake"],
+		}),
+		password: t.String({
+			minLength: 8,
+			maxLength: 100,
+			pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
+			description:
+				"must be at least 8 characters and contain uppercase, lowercase, and numbers",
+			examples: ["hunter2A"],
+		}),
+		username: t.String({ minLength: 2, examples: ["jake"] }),
+		bio: t.Optional(
+			t.String({
+				minLength: 2,
+				examples: ["I work at statefarm"],
+			}),
+		),
+		image: t.Optional(
+			t.String({
+				format: "uri",
+				examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
+			}),
+		),
+	}),
+});
+
 const usersModel = new Elysia().model({
 	LoginUser: t.Object({
 		user: t.Object({
@@ -21,35 +51,7 @@ const usersModel = new Elysia().model({
 			}),
 		}),
 	}),
-	RegisterUser: t.Object({
-		user: t.Object({
-			email: t.String({
-				format: "email",
-				examples: ["jake@jake.jake"],
-			}),
-			password: t.String({
-				minLength: 8,
-				maxLength: 100,
-				pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d@$!%*?&]{8,}$",
-				description:
-					"must be at least 8 characters and contain uppercase, lowercase, and numbers",
-				examples: ["hunter2A"],
-			}),
-			username: t.String({ minLength: 2, examples: ["jake"] }),
-			bio: t.Optional(
-				t.String({
-					minLength: 2,
-					examples: ["I work at statefarm"],
-				}),
-			),
-			image: t.Optional(
-				t.String({
-					format: "uri",
-					examples: ["https://api.realworld.io/images/smiley-cyrus.jpg"],
-				}),
-			),
-		}),
-	}),
+	CreateUser,
 	UserResponse: t.Object({
 		user: t.Object({
 			email: t.String({
@@ -71,6 +73,9 @@ const usersModel = new Elysia().model({
 				t.Null(),
 			]),
 		}),
+	}),
+	UpdateUser: t.Object({
+		user: t.Partial(CreateUser.properties.user),
 	}),
 });
 
@@ -145,29 +150,68 @@ export const api = new Elysia({ prefix: "/api" })
 					detail: {
 						summary: "Registration",
 					},
-					body: "RegisterUser",
+					body: "CreateUser",
 					response: "UserResponse",
 				},
 			),
 	)
 	.group("/user", (app) =>
-		app.use(usersModel).get(
-			"/",
-			async ({ auth: { sign, jwtPayload } }) => {
-				const user = await db.query.users.findFirst({
-					where: eq(users.id, jwtPayload.uid),
-				});
-				if (!user) {
-					throw new NotFoundError("user");
-				}
-				return toUserResponse(user, sign);
-			},
-			{
-				detail: {
-					summary: "Get Current User",
+		app
+			.use(usersModel)
+			.get(
+				"/",
+				async ({ auth: { sign, jwtPayload } }) => {
+					const user = await db.query.users.findFirst({
+						where: eq(users.id, jwtPayload.uid),
+					});
+					if (!user) {
+						throw new NotFoundError("user");
+					}
+					return toUserResponse(user, sign);
 				},
-				response: "UserResponse",
-				auth: true,
-			},
-		),
+				{
+					detail: {
+						summary: "Get Current User",
+					},
+					response: "UserResponse",
+					auth: true,
+				},
+			)
+			.put(
+				"/",
+				async ({ body: { user }, auth: { sign, jwtPayload } }) => {
+					try {
+						const [updatedUser] = await db
+							.update(users)
+							.set({
+								...user,
+								password: user?.password
+									? await Bun.password.hash(user.password)
+									: undefined,
+							})
+							.where(eq(users.id, jwtPayload.uid))
+							.returning();
+						if (!updatedUser) {
+							throw new NotFoundError("user");
+						}
+						return toUserResponse(updatedUser, sign);
+					} catch (error) {
+						console.error(error);
+						if (error instanceof RealWorldError) {
+							throw error;
+						}
+						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+							user: ["internal server error"],
+						});
+					}
+				},
+				{
+					detail: {
+						summary: "Update User",
+					},
+					body: "UpdateUser",
+					response: "UserResponse",
+					auth: true,
+				},
+			),
 	);

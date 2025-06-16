@@ -187,5 +187,4 @@ JWTOption<Name, Schema>) => {
 		},
 	});
 };
-
 export default jwt;

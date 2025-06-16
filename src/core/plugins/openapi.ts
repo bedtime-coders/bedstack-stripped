@@ -1,7 +1,7 @@
 import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { description, title } from "../../package.json";
+import { description, title } from "../../../package.json";
 
 const paths = {
 	scalar: "/docs",
