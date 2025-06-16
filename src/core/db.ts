@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env } from "@/core/env";
 import { users } from "@/schema";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 

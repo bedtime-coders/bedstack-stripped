@@ -1,10 +1,9 @@
-import { env } from "@/env";
-import { RealWorldError } from "@/errors/realworld";
+import { env } from "@/core/env";
+import { RealWorldError } from "@/shared/errors/realworld";
+import { jwt, token } from "@/shared/plugins";
 import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { name } from "../../package.json";
-import jwt from "./jwt";
-import token from "./token";
+import { name } from "../../../package.json";
 
 const JwtPayload = t.Object({
 	uid: t.Number(),

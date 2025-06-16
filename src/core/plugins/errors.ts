@@ -1,10 +1,10 @@
-import { DEFAULT_ERROR_MESSAGE } from "@/consts";
-import { RealWorldError } from "@/errors/realworld";
+import { DEFAULT_ERROR_MESSAGE } from "@/shared/constants";
 import {
+	RealWorldError,
 	formatNotFoundError,
 	formatValidationError,
 	isElysiaError,
-} from "@/errors/utils";
+} from "@/shared/errors";
 import { Elysia, NotFoundError, ValidationError } from "elysia";
 import { pick } from "radashi";
 
