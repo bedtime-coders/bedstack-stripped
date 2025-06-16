@@ -1,7 +1,7 @@
 {
 	"name": "bedstack-stripped",
 	"title": "Bedstack (Stripped)",
-	"description": "Stripped version of Bedstack for rapid prototyping",
+	"description": "⚡ Stripped version of Bedstack for rapid prototyping",
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
