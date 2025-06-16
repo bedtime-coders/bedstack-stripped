@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 
-export const CreateUser = t.Object({
+const CreateUser = t.Object({
 	user: t.Object({
 		email: t.String({
 			format: "email",
