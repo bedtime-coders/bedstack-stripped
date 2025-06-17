@@ -29,7 +29,6 @@ export const openapi = new Elysia()
 			scalarConfig: {
 				favicon: "/public/icon-dark.svg",
 				persistAuth: true,
-				theme: "saturn",
 			},
 		}),
 	)
