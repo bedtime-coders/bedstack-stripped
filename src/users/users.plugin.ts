@@ -10,9 +10,9 @@ import { users } from "./users.schema";
 
 export const usersPlugin = new Elysia()
 	.use(auth)
+	.use(usersModel)
 	.group("/users", (app) =>
 		app
-			.use(usersModel)
 			.post(
 				"/login",
 				async ({ body: { user }, auth: { sign } }) => {
@@ -83,7 +83,6 @@ export const usersPlugin = new Elysia()
 	)
 	.group("/user", (app) =>
 		app
-			.use(usersModel)
 			.get(
 				"/",
 				async ({ auth: { sign, jwtPayload } }) => {

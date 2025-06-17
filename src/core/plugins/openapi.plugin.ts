@@ -1,17 +1,14 @@
+import { openapi as openapiPlugin } from "@bedtime-coders/elysia-openapi";
 import { staticPlugin } from "@elysiajs/static";
-import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { description, title } from "../../../package.json";
 
-const paths = {
-	scalar: "/docs",
-	json: "/openapi.json",
-};
+const path = "/docs";
 
 export const openapi = new Elysia()
 	.use(staticPlugin())
 	.use(
-		swagger({
+		openapiPlugin({
 			documentation: {
 				info: { title, version: "", description },
 				components: {
@@ -28,11 +25,11 @@ export const openapi = new Elysia()
 			},
 			exclude: ["/"],
 			scalarVersion: "1.31.10",
-			path: paths.scalar,
-			specPath: paths.json,
+			path,
 			scalarConfig: {
 				favicon: "/public/icon-dark.svg",
+				persistAuth: true,
 			},
 		}),
 	)
-	.get("/", ({ redirect }) => redirect(paths.scalar));
+	.get("/", ({ redirect }) => redirect(path));

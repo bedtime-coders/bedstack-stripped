@@ -15,6 +15,9 @@ export const envPlugin = elysiaEnv({
 			default: "development",
 		},
 	),
+	LOG_LEVEL: t.Union([t.Literal("debug"), t.Literal("info")], {
+		default: "info",
+	}),
 });
 
 export const { env } = envPlugin.decorator;
