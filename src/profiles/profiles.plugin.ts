@@ -117,6 +117,12 @@ export const profilesPlugin = new Elysia()
 							throw new NotFoundError("profile");
 						}
 
+						if (user.id === jwtPayload.uid) {
+							throw new RealWorldError(StatusCodes.UNPROCESSABLE_ENTITY, {
+								profile: ["cannot be unfollowed by yourself"],
+							});
+						}
+
 						await db
 							.delete(follows)
 							.where(
