@@ -7,4 +7,11 @@ export const users = sqliteTable("users", {
 	bio: text("bio"),
 	image: text("image"),
 	password: text("password").notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.default(new Date()),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.default(new Date())
+		.$onUpdate(() => new Date()),
 });

@@ -1,11 +1,28 @@
 import { users } from "@/users/users.schema";
-import { integer, sqliteTable } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { check, integer, sqliteTable } from "drizzle-orm/sqlite-core";
 
-export const follows = sqliteTable("follows", {
-	followerId: integer("follower_id")
-		.notNull()
-		.references(() => users.id),
-	followingId: integer("following_id")
-		.notNull()
-		.references(() => users.id),
-});
+export const follows = sqliteTable(
+	"follows",
+	{
+		followerId: integer("follower_id")
+			.notNull()
+			.references(() => users.id),
+		followingId: integer("following_id")
+			.notNull()
+			.references(() => users.id),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.default(new Date()),
+		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.notNull()
+			.default(new Date())
+			.$onUpdate(() => new Date()),
+	},
+	(table) => [
+		check(
+			"unique_follower_following",
+			sql`${table.followerId} != ${table.followingId}`,
+		),
+	],
+);

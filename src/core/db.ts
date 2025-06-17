@@ -8,4 +8,5 @@ export const db = drizzle(env.DATABASE_URL, {
 		users,
 		follows,
 	},
+	logger: env.LOG_LEVEL === "debug",
 });

@@ -4,15 +4,16 @@ import { auth } from "@/shared/plugins";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { pick } from "radashi";
 import { toResponse } from "./mappers";
 import { usersModel } from "./users.model";
 import { users } from "./users.schema";
 
 export const usersPlugin = new Elysia()
 	.use(auth)
+	.use(usersModel)
 	.group("/users", (app) =>
 		app
-			.use(usersModel)
 			.post(
 				"/login",
 				async ({ body: { user }, auth: { sign } }) => {
@@ -83,7 +84,6 @@ export const usersPlugin = new Elysia()
 	)
 	.group("/user", (app) =>
 		app
-			.use(usersModel)
 			.get(
 				"/",
 				async ({ auth: { sign, jwtPayload } }) => {
@@ -122,22 +122,29 @@ export const usersPlugin = new Elysia()
 							return Boolean(existing && existing.id !== jwtPayload.uid);
 						},
 					);
-					const [updatedUser] = await db
-						.update(users)
-						.set({
-							...user,
-							password: user?.password
-								? await Bun.password.hash(user.password)
-								: undefined,
-						})
-						.where(eq(users.id, jwtPayload.uid))
-						.returning();
-					if (!updatedUser) {
+					try {
+						const [updatedUser] = await db
+							.update(users)
+							.set({
+								...pick(user, ["email", "username", "bio", "image"]),
+								password: user?.password
+									? await Bun.password.hash(user.password)
+									: undefined,
+							})
+							.where(eq(users.id, jwtPayload.uid))
+							.returning();
+						if (!updatedUser) {
+							throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+								user: ["failed to update"],
+							});
+						}
+						return toResponse(updatedUser, sign);
+					} catch (error) {
+						console.error("Error updating user:", error);
 						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
 							user: ["failed to update"],
 						});
 					}
-					return toResponse(updatedUser, sign);
 				},
 				{
 					detail: {
