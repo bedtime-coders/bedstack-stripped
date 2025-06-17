@@ -18,10 +18,10 @@ export const follows = sqliteTable(
 			.references(() => users.id),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(new Date()),
+			.default(sql`(unixepoch('subsec') * 1000)`),
 		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(new Date())
+			.default(sql`(unixepoch('subsec') * 1000)`)
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [

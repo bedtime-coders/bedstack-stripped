@@ -10,9 +10,9 @@ export const users = sqliteTable("users", {
 	password: text("password").notNull(),
 	createdAt: integer("created_at", { mode: "timestamp_ms" })
 		.notNull()
-		.default(new Date()),
+		.default(sql`(unixepoch('subsec') * 1000)`),
 	updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 		.notNull()
-		.default(new Date())
+		.default(sql`(unixepoch('subsec') * 1000)`)
 		.$onUpdate(() => new Date()),
 });
