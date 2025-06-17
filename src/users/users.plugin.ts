@@ -4,7 +4,6 @@ import { auth } from "@/shared/plugins";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { pick } from "radashi";
 import { toResponse } from "./mappers";
 import { usersModel } from "./users.model";
 import { users } from "./users.schema";
@@ -125,7 +124,7 @@ export const usersPlugin = new Elysia()
 					const [updatedUser] = await db
 						.update(users)
 						.set({
-							...pick(user, ["email", "username", "bio", "image"]),
+							...user,
 							password: user?.password
 								? await Bun.password.hash(user.password)
 								: undefined,
