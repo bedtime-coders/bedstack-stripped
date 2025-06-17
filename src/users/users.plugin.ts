@@ -122,29 +122,22 @@ export const usersPlugin = new Elysia()
 							return Boolean(existing && existing.id !== jwtPayload.uid);
 						},
 					);
-					try {
-						const [updatedUser] = await db
-							.update(users)
-							.set({
-								...pick(user, ["email", "username", "bio", "image"]),
-								password: user?.password
-									? await Bun.password.hash(user.password)
-									: undefined,
-							})
-							.where(eq(users.id, jwtPayload.uid))
-							.returning();
-						if (!updatedUser) {
-							throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
-								user: ["failed to update"],
-							});
-						}
-						return toResponse(updatedUser, sign);
-					} catch (error) {
-						console.error("Error updating user:", error);
+					const [updatedUser] = await db
+						.update(users)
+						.set({
+							...pick(user, ["email", "username", "bio", "image"]),
+							password: user?.password
+								? await Bun.password.hash(user.password)
+								: undefined,
+						})
+						.where(eq(users.id, jwtPayload.uid))
+						.returning();
+					if (!updatedUser) {
 						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
 							user: ["failed to update"],
 						});
 					}
+					return toResponse(updatedUser, sign);
 				},
 				{
 					detail: {
