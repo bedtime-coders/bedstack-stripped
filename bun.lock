@@ -4,7 +4,7 @@
     "": {
       "name": "bedstack-stripped",
       "dependencies": {
-        "@bedtime-coders/elysia-openapi": "^1.0.0",
+        "@bedtime-coders/elysia-openapi": "^1.1.0",
         "@elysiajs/static": "^1.3.0",
         "@yolk-oss/elysia-env": "^3.0.0",
         "chalk": "^5.4.1",
@@ -27,7 +27,7 @@
   "packages": {
     "@babel/runtime": ["@babel/runtime@7.27.6", "", {}, "sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q=="],
 
-    "@bedtime-coders/elysia-openapi": ["@bedtime-coders/elysia-openapi@1.0.0", "", { "dependencies": { "@changesets/cli": "^2.29.4", "@scalar/themes": "^0.13.3", "@scalar/types": "^0.2.3", "openapi-types": "^12.1.3", "pathe": "^1.1.2" }, "peerDependencies": { "elysia": "^1.3.5" } }, "sha512-FLyeQ+HbYOInEHEjewnrIkFelKgKMNNIdPN0XYkt6l0mJ7LAAom1PikUDBUdUlRSIvaVJ4573sMj1PJ1RhMSSA=="],
+    "@bedtime-coders/elysia-openapi": ["@bedtime-coders/elysia-openapi@1.1.0", "", { "dependencies": { "@changesets/cli": "^2.29.4", "@scalar/themes": "^0.13.3", "@scalar/types": "^0.2.3", "openapi-types": "^12.1.3", "pathe": "^1.1.2" }, "peerDependencies": { "elysia": "^1.3.5" } }, "sha512-cqQjaLtImSyKvpgp99gkYUs08FvBDCRZSplO8GDhrWJkwPfp4/maehiWhXTWqI8F1GC+DWJuaU5kjjq+VBB6mw=="],
 
     "@biomejs/biome": ["@biomejs/biome@1.9.4", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "1.9.4", "@biomejs/cli-darwin-x64": "1.9.4", "@biomejs/cli-linux-arm64": "1.9.4", "@biomejs/cli-linux-arm64-musl": "1.9.4", "@biomejs/cli-linux-x64": "1.9.4", "@biomejs/cli-linux-x64-musl": "1.9.4", "@biomejs/cli-win32-arm64": "1.9.4", "@biomejs/cli-win32-x64": "1.9.4" }, "bin": { "biome": "bin/biome" } }, "sha512-1rkd7G70+o9KkTn5KLmDYXihGoTaIGO9PIIN2ZB7UJxFrWw04CZHPYiMRjYsaDvVV7hP1dYNRLxSANLaBFGpog=="],
 
