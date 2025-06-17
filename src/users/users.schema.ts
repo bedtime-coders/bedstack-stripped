@@ -8,11 +8,11 @@ export const users = sqliteTable("users", {
 	bio: text("bio"),
 	image: text("image"),
 	password: text("password").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp" })
+	createdAt: integer("created_at", { mode: "timestamp_ms" })
 		.notNull()
-		.default(sql`CURRENT_TIMESTAMP`),
-	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.default(new Date()),
+	updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 		.notNull()
-		.default(sql`CURRENT_TIMESTAMP`)
+		.default(new Date())
 		.$onUpdate(() => new Date()),
 });

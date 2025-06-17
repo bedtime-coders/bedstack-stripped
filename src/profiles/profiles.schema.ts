@@ -11,12 +11,12 @@ export const follows = sqliteTable(
 		followingId: integer("following_id")
 			.notNull()
 			.references(() => users.id),
-		createdAt: integer("created_at", { mode: "timestamp" })
+		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(sql`CURRENT_TIMESTAMP`),
-		updatedAt: integer("updated_at", { mode: "timestamp" })
+			.default(new Date()),
+		updatedAt: integer("updated_at", { mode: "timestamp_ms" })
 			.notNull()
-			.default(sql`CURRENT_TIMESTAMP`)
+			.default(new Date())
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [
