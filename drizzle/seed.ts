@@ -57,11 +57,15 @@ const userIds = await db.select({ id: users.id }).from(users);
 const followsData = new Set<string>();
 const followRows = [];
 
-while (followRows.length < 20) {
+let attempts = 0;
+const MAX_ATTEMPTS = 100; // Reasonable threshold for 20 follows
+
+while (followRows.length < 20 && attempts < MAX_ATTEMPTS) {
 	const follower = draw(userIds);
 	const following = draw(userIds);
 
 	if (!follower || !following) {
+		attempts++;
 		continue;
 	}
 
@@ -72,6 +76,13 @@ while (followRows.length < 20) {
 			followRows.push({ followerId: follower.id, followingId: following.id });
 		}
 	}
+	attempts++;
+}
+
+if (followRows.length < 20) {
+	console.warn(
+		`Could only generate ${followRows.length} unique follows after ${MAX_ATTEMPTS} attempts`,
+	);
 }
 
 await db.insert(follows).values(followRows);
