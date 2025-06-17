@@ -1,6 +1,11 @@
 import { users } from "@/users/users.schema";
 import { sql } from "drizzle-orm";
-import { check, integer, sqliteTable } from "drizzle-orm/sqlite-core";
+import {
+	check,
+	integer,
+	primaryKey,
+	sqliteTable,
+} from "drizzle-orm/sqlite-core";
 
 export const follows = sqliteTable(
 	"follows",
@@ -20,6 +25,7 @@ export const follows = sqliteTable(
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [
+		primaryKey({ columns: [table.followerId, table.followingId] }),
 		check(
 			"unique_follower_following",
 			sql`${table.followerId} != ${table.followingId}`,
