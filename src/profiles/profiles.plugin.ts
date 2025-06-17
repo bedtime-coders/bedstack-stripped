@@ -24,7 +24,7 @@ export const profilesPlugin = new Elysia()
 			app
 				.get(
 					"/:username",
-					async ({ params: { username }, jwt }) => {
+					async ({ params: { username }, auth: { jwtPayload } }) => {
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
@@ -33,7 +33,6 @@ export const profilesPlugin = new Elysia()
 							throw new NotFoundError("profile");
 						}
 						let following = false;
-						const jwtPayload = await jwt.verify();
 						if (jwtPayload) {
 							const follow = await db.query.follows.findFirst({
 								where: and(

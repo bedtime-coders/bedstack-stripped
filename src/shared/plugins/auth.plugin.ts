@@ -26,15 +26,19 @@ export const auth = new Elysia()
 		}),
 	)
 	.use(token())
-	.derive({ as: "global" }, ({ jwt }) => ({
-		auth: {
-			sign: ((jwtPayload) =>
-				jwt.sign({
-					...jwtPayload,
-					iat: Math.floor(Date.now() / 1000),
-				})) satisfies SignFn,
-		},
-	}))
+	.derive({ as: "global" }, async ({ jwt }) => {
+		const jwtPayload = await jwt.verify();
+		return {
+			auth: {
+				sign: ((jwtPayload) =>
+					jwt.sign({
+						...jwtPayload,
+						iat: Math.floor(Date.now() / 1000),
+					})) satisfies SignFn,
+				jwtPayload: jwtPayload || null,
+			},
+		};
+	})
 	.macro({
 		auth: {
 			async resolve({ jwt, token, auth }) {
