@@ -85,7 +85,9 @@ if (followRows.length < 20) {
 	);
 }
 
-await db.insert(follows).values(followRows);
+if (followRows.length > 0) {
+	await db.insert(follows).values(followRows);
+}
 
 console.log(`[${chalk.green("✓")}] Database seeded`);
 
