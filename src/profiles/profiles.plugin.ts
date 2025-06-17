@@ -5,6 +5,7 @@ import { users } from "@/users/users.schema";
 import { and, eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { toResponse } from "./mappers";
 import { profilesModel } from "./profiles.model";
 import { follows } from "./profiles.schema";
 
@@ -32,6 +33,7 @@ export const profilesPlugin = new Elysia()
 						if (!user) {
 							throw new NotFoundError("profile");
 						}
+
 						let following = false;
 						if (jwtPayload) {
 							const follow = await db.query.follows.findFirst({
@@ -43,14 +45,7 @@ export const profilesPlugin = new Elysia()
 							following = Boolean(follow);
 						}
 
-						return {
-							profile: {
-								username: user.username,
-								bio: user.bio,
-								image: user.image,
-								following,
-							},
-						};
+						return toResponse(user, following);
 					},
 					{
 						detail: {
@@ -67,6 +62,7 @@ export const profilesPlugin = new Elysia()
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
+
 						if (!user) {
 							throw new NotFoundError("profile");
 						}
@@ -85,14 +81,7 @@ export const profilesPlugin = new Elysia()
 							})
 							.onConflictDoNothing();
 
-						return {
-							profile: {
-								username: user.username,
-								bio: user.bio,
-								image: user.image,
-								following: true,
-							},
-						};
+						return toResponse(user, true);
 					},
 					{
 						detail: {
@@ -131,14 +120,7 @@ export const profilesPlugin = new Elysia()
 								),
 							);
 
-						return {
-							profile: {
-								username: user.username,
-								bio: user.bio,
-								image: user.image,
-								following: false,
-							},
-						};
+						return toResponse(user, false);
 					},
 					{
 						detail: {
