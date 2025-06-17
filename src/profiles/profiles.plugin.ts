@@ -57,20 +57,13 @@ export const profilesPlugin = new Elysia()
 			)
 			.post(
 				"/:username/follow",
-				async ({ params: { username }, jwt }) => {
+				async ({ params: { username }, auth: { jwtPayload } }) => {
 					const user = await db.query.users.findFirst({
 						where: eq(users.username, username),
 					});
 
 					if (!user) {
 						throw new NotFoundError("profile");
-					}
-
-					const jwtPayload = await jwt.verify();
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
 					}
 
 					if (user.id === jwtPayload.uid) {
@@ -110,20 +103,13 @@ export const profilesPlugin = new Elysia()
 			)
 			.delete(
 				"/:username/follow",
-				async ({ params: { username }, jwt }) => {
+				async ({ params: { username }, auth: { jwtPayload } }) => {
 					const user = await db.query.users.findFirst({
 						where: eq(users.username, username),
 					});
 
 					if (!user) {
 						throw new NotFoundError("profile");
-					}
-
-					const jwtPayload = await jwt.verify();
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
 					}
 
 					await db
