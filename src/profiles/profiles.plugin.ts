@@ -48,7 +48,8 @@ export const profilesPlugin = new Elysia()
 				{
 					detail: {
 						summary: "Get Profile",
-						description: "Authentication optional, returns a Profile",
+						description:
+							"Authentication optional, returns a [Profile](docs#model/profile)",
 					},
 					params: "Username",
 					response: "Profile",
@@ -97,8 +98,9 @@ export const profilesPlugin = new Elysia()
 				},
 				{
 					detail: {
-						summary: "Follow User",
-						description: "Authentication required, returns a Profile",
+						summary: "Follow user",
+						description:
+							"Authentication required, returns a [Profile](docs#model/profile)",
 						security: [{ tokenAuth: [] }],
 					},
 					params: "Username",
@@ -144,8 +146,9 @@ export const profilesPlugin = new Elysia()
 				},
 				{
 					detail: {
-						summary: "Unfollow User",
-						description: "Authentication required, returns a Profile",
+						summary: "Unfollow user",
+						description:
+							"Authentication required, returns a [Profile](docs#model/profile)",
 						security: [{ tokenAuth: [] }],
 					},
 					params: "Username",
