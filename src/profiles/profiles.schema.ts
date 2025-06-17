@@ -13,10 +13,10 @@ export const follows = sqliteTable(
 			.references(() => users.id),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
-			.default(new Date()),
+			.default(sql`CURRENT_TIMESTAMP`),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
-			.default(new Date())
+			.default(sql`CURRENT_TIMESTAMP`)
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [
