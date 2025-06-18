@@ -3,7 +3,7 @@ import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError, assertNoConflicts } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { users } from "@/users/users.schema";
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { sift } from "radashi";
@@ -37,31 +37,26 @@ export const articlesPlugin = new Elysia()
 								},
 							},
 						},
-						where: (articles, { and, eq }) => {
-							const conditions = [];
-
-							if (tag) {
-								conditions.push(eq(articleTags.tagId, tag));
-							}
-
-							if (authorUsername) {
-								conditions.push(eq(articles.authorId, authorUsername));
-							}
-
-							if (favoritedByUsername) {
-								// For favorites, we'll need to handle this separately
-								// since it's a many-to-many relationship
-							}
-
-							return conditions.length > 0 ? and(...conditions) : undefined;
-						},
 						orderBy: (articles, { desc }) => [desc(articles.createdAt)],
 						limit,
 						offset,
 					});
 
-					// Handle favorited filter separately if needed
+					// Apply filters after fetching data
 					let filteredArticles = articlesWithAuthors;
+
+					if (tag) {
+						filteredArticles = filteredArticles.filter((article) =>
+							article.tags.some((articleTag) => articleTag.tag.name === tag),
+						);
+					}
+
+					if (authorUsername) {
+						filteredArticles = filteredArticles.filter(
+							(article) => article.author.username === authorUsername,
+						);
+					}
+
 					if (favoritedByUsername) {
 						const favoritedUser = await db.query.users.findFirst({
 							where: eq(users.username, favoritedByUsername),
@@ -76,39 +71,18 @@ export const articlesPlugin = new Elysia()
 							.where(eq(favorites.userId, favoritedUser.id));
 
 						const favoritedIds = favoritedArticleIds.map((f) => f.articleId);
-						filteredArticles = articlesWithAuthors.filter((article) =>
+						filteredArticles = filteredArticles.filter((article) =>
 							favoritedIds.includes(article.id),
 						);
 					}
 
-					// Get tags for all articles
-					const articleIds = filteredArticles.map((row) => row.id);
-					const articleTagsData = await db
-						.select({
-							articleId: articleTags.articleId,
-							tag: tags,
-						})
-						.from(articleTags)
-						.innerJoin(tags, eq(articleTags.tagId, tags.id))
-						.where(inArray(articleTags.articleId, articleIds));
+					// Get tags for all articles (already included in the query above)
+					// No need for separate tag query since we have the data
 
-					// Group tags by article
-					const tagsByArticle = articleTagsData.reduce(
-						(acc, row) => {
-							if (!acc[row.articleId]) {
-								acc[row.articleId] = [];
-							}
-							// biome-ignore lint/style/noNonNullAssertion: we just defined it
-							acc[row.articleId]!.push(row.tag);
-							return acc;
-						},
-						{} as Record<string, (typeof tags.$inferSelect)[]>,
-					);
-
-					// Combine articles with their tags
-					const articlesWithData = filteredArticles.map((row) => ({
-						...row,
-						tags: tagsByArticle[row.id] || [],
+					// Transform the data to match the expected format
+					const articlesWithData = filteredArticles.map((article) => ({
+						...article,
+						tags: article.tags.map((articleTag) => articleTag.tag),
 					}));
 
 					return toArticlesResponse(articlesWithData, jwtPayload?.uid);
@@ -134,49 +108,38 @@ export const articlesPlugin = new Elysia()
 
 					const { limit = 20, offset = 0 } = query;
 
-					// Get articles from followed authors
-					const articlesWithAuthors = await db
-						.select({
-							article: articles,
-							author: users,
-						})
-						.from(articles)
-						.innerJoin(users, eq(articles.authorId, users.id))
-						.innerJoin(follows, eq(articles.authorId, follows.followingId))
-						.where(eq(follows.followerId, jwtPayload.uid))
-						.orderBy(desc(articles.createdAt))
-						.limit(limit)
-						.offset(offset);
-
-					// Get tags for all articles
-					const articleIds = articlesWithAuthors.map((row) => row.article.id);
-					const articleTagsData = await db
-						.select({
-							articleId: articleTags.articleId,
-							tag: tags,
-						})
-						.from(articleTags)
-						.innerJoin(tags, eq(articleTags.tagId, tags.id))
-						.where(inArray(articleTags.articleId, articleIds));
-
-					// Group tags by article
-					const tagsByArticle = articleTagsData.reduce(
-						(acc, row) => {
-							if (!acc[row.articleId]) {
-								acc[row.articleId] = [];
-							}
-							// biome-ignore lint/style/noNonNullAssertion: we just defined it
-							acc[row.articleId]!.push(row.tag);
-							return acc;
+					// Get articles from followed authors using relational queries
+					const articlesWithAuthors = await db.query.articles.findMany({
+						with: {
+							author: true,
+							tags: {
+								with: {
+									tag: true,
+								},
+							},
 						},
-						{} as Record<string, (typeof tags.$inferSelect)[]>,
+						where: (articles, { eq }) =>
+							eq(articles.authorId, follows.followingId),
+						orderBy: (articles, { desc }) => [desc(articles.createdAt)],
+						limit,
+						offset,
+					});
+
+					// Filter by followed authors
+					const followedUserIds = await db
+						.select({ followingId: follows.followingId })
+						.from(follows)
+						.where(eq(follows.followerId, jwtPayload.uid));
+
+					const followedIds = followedUserIds.map((f) => f.followingId);
+					const filteredArticles = articlesWithAuthors.filter((article) =>
+						followedIds.includes(article.authorId),
 					);
 
-					// Combine articles with their tags
-					const articlesWithData = articlesWithAuthors.map((row) => ({
-						...row.article,
-						author: row.author,
-						tags: tagsByArticle[row.article.id] || [],
+					// Transform the data to match the expected format
+					const articlesWithData = filteredArticles.map((article) => ({
+						...article,
+						tags: article.tags.map((articleTag) => articleTag.tag),
 					}));
 
 					return toArticlesResponse(articlesWithData, jwtPayload.uid);
