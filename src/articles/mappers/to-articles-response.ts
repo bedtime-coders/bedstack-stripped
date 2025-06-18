@@ -4,6 +4,12 @@ import type { users } from "@/users/users.schema";
 import { type InferSelectModel, and, count, eq, inArray } from "drizzle-orm";
 import { type articles, favorites, type tags } from "../articles.schema";
 
+/**
+ * Map an array of articles to a response
+ * @param articlesWithData The articles to map
+ * @param currentUserId The current user's ID. If provided, the articles will be mapped to the current user's perspective.
+ * @returns The mapped articles
+ */
 export async function toArticlesResponse(
 	articlesWithData: Array<
 		InferSelectModel<typeof articles> & {
