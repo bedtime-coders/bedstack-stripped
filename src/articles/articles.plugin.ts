@@ -2,6 +2,7 @@ import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
+import { slugify } from "@/shared/utils";
 import { users } from "@/users/users.schema";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
@@ -9,11 +10,7 @@ import { StatusCodes } from "http-status-codes";
 import { sift } from "radashi";
 import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
-import {
-	generateSlug as slugify,
-	toArticleResponse,
-	toArticlesResponse,
-} from "./mappers";
+import { toArticlesResponse, toResponse } from "./mappers";
 
 export const articlesPlugin = new Elysia()
 	.use(auth)
@@ -157,16 +154,7 @@ export const articlesPlugin = new Elysia()
 			.post(
 				"/",
 				async ({ body: { article }, auth: { jwtPayload } }) => {
-					let slug = slugify(article.title);
-					let counter = 1;
-					while (true) {
-						const existing = await db.query.articles.findFirst({
-							where: eq(articles.slug, slug),
-						});
-						if (!existing) break;
-						slug = `${slugify(article.title)}-${counter}`;
-						counter++;
-					}
+					const slug = slugify(article.title);
 
 					// Create article
 					const [createdArticle] = await db
@@ -241,7 +229,7 @@ export const articlesPlugin = new Elysia()
 						throw new NotFoundError("article");
 					}
 
-					return toArticleResponse(
+					return toResponse(
 						{
 							...articleWithData,
 							tags: articleWithData.tags.map((at) => at.tag),
@@ -279,7 +267,7 @@ export const articlesPlugin = new Elysia()
 						throw new NotFoundError("article");
 					}
 
-					return toArticleResponse(
+					return toResponse(
 						{
 							...articleWithData,
 							tags: articleWithData.tags.map((at) => at.tag),
@@ -322,15 +310,6 @@ export const articlesPlugin = new Elysia()
 					let newSlug = existingArticle.slug;
 					if (article.title && article.title !== existingArticle.title) {
 						newSlug = slugify(article.title);
-						let counter = 1;
-						while (true) {
-							const existing = await db.query.articles.findFirst({
-								where: eq(articles.slug, newSlug),
-							});
-							if (!existing || existing.id === existingArticle.id) break;
-							newSlug = `${slugify(article.title)}-${counter}`;
-							counter++;
-						}
 					}
 
 					// Update article
@@ -410,7 +389,7 @@ export const articlesPlugin = new Elysia()
 						throw new NotFoundError("article");
 					}
 
-					return toArticleResponse(
+					return toResponse(
 						{
 							...articleWithData,
 							tags: articleWithData.tags.map((at) => at.tag),

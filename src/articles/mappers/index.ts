@@ -1,1 +1,2 @@
-export * from "./to-response.mapper";
+export * from "./to-articles-response";
+export * from "./to-response";
