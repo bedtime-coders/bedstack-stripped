@@ -26,8 +26,8 @@ export const auth = new Elysia()
 		}),
 	)
 	.use(token())
-	.derive({ as: "global" }, async ({ jwt }) => {
-		const jwtPayload = await jwt.verify();
+	.derive({ as: "global" }, async ({ jwt, token }) => {
+		const jwtPayload = await jwt.verify(token);
 		return {
 			auth: {
 				sign: ((jwtPayload) =>
