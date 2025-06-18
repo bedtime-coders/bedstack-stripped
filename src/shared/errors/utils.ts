@@ -1,4 +1,3 @@
-import { SQLiteError } from "bun:sqlite";
 import type { NotFoundError, ValidationError } from "elysia";
 import { ConflictingFieldsError } from "./conflicting-fields";
 
@@ -70,12 +69,6 @@ export function formatNotFoundError(error: NotFoundError) {
 			[error.message.toLowerCase()]: "not found",
 		},
 	};
-}
-
-export function isSqliteUniqueError(error: unknown): error is SQLiteError {
-	return (
-		error instanceof SQLiteError && error.code === "SQLITE_CONSTRAINT_UNIQUE"
-	);
 }
 
 type Fields<T extends string> = Partial<Record<T, string>>;

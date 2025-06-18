@@ -13,9 +13,16 @@
 		"check:errors": "biome check --diagnostic-level=error",
 		"typecheck": "tsc --noEmit",
 		"clean": "rimraf node_modules bun.lockb dist",
+		"db": "docker compose up",
+		"db:start": "docker compose up -d",
+		"db:stop": "docker compose stop",
+		"db:restart": "docker compose restart",
+		"db:down": "docker compose down",
+		"db:remove": "docker compose down -v",
 		"db:push": "drizzle-kit push",
 		"db:generate": "drizzle-kit generate",
 		"db:studio": "drizzle-kit studio",
+		"db:migrate": "drizzle-kit migrate",
 		"db:seed": "bun run drizzle/seed.ts",
 		"db:reset": "bun run drizzle/reset.ts"
 	},
@@ -33,9 +40,9 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/bun": "^1.2.15",
-		"better-sqlite3": "^11.10.0",
 		"drizzle-kit": "^0.31.1",
 		"drizzle-seed": "^0.3.1",
+		"pg": "^8.16.1",
 		"typescript": "^5.8.3"
 	},
 	"module": "src/index.js"

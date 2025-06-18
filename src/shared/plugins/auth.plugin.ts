@@ -7,7 +7,7 @@ import jwt from "./jwt.plugin";
 import { token } from "./token.plugin";
 
 const JwtPayload = t.Object({
-	uid: t.Number(),
+	uid: t.String(),
 	email: t.String(),
 	username: t.String(),
 });

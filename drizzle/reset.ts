@@ -2,7 +2,7 @@ import { env } from "@/core/env";
 import { follows } from "@/profiles/profiles.schema";
 import { users } from "@/users/users.schema";
 import chalk from "chalk";
-import { drizzle } from "drizzle-orm/bun-sqlite";
+import { drizzle } from "drizzle-orm/bun-sql";
 import { reset } from "drizzle-seed";
 
 const schema = {

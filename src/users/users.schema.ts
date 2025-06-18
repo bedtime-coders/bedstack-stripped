@@ -1,18 +1,16 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-export const users = sqliteTable("users", {
-	id: integer("id").primaryKey(),
+export const users = pgTable("users", {
+	id: uuid("id").primaryKey().defaultRandom(),
 	email: text("email").notNull().unique(),
 	username: text("username").unique().notNull(),
 	bio: text("bio"),
 	image: text("image"),
 	password: text("password").notNull(),
-	createdAt: integer("created_at", { mode: "timestamp_ms" })
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at")
 		.notNull()
-		.default(sql`(unixepoch('subsec') * 1000)`),
-	updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-		.notNull()
-		.default(sql`(unixepoch('subsec') * 1000)`)
-		.$onUpdate(() => new Date()),
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
 });
