@@ -1,6 +1,18 @@
 import { Elysia, t } from "elysia";
 
-const Author = t.Object({
+export const ArticleQuery = t.Object({
+	tag: t.Optional(t.String({ examples: ["AngularJS"] })),
+	author: t.Optional(t.String({ examples: ["jake"] })),
+	favorited: t.Optional(t.String({ examples: ["jake"] })),
+	limit: t.Optional(t.Number({ minimum: 1, maximum: 100, examples: [20] })),
+	offset: t.Optional(t.Number({ minimum: 0, examples: [0] })),
+});
+export const FeedQuery = t.Object({
+	limit: t.Optional(t.Number({ minimum: 1, maximum: 100, examples: [20] })),
+	offset: t.Optional(t.Number({ minimum: 0, examples: [0] })),
+});
+
+export const Author = t.Object({
 	username: t.String({
 		examples: ["jake"],
 	}),
@@ -117,16 +129,5 @@ export const articlesModel = new Elysia().model({
 		articlesCount: t.Number({
 			examples: [2],
 		}),
-	}),
-	ArticleQuery: t.Object({
-		tag: t.Optional(t.String({ examples: ["AngularJS"] })),
-		author: t.Optional(t.String({ examples: ["jake"] })),
-		favorited: t.Optional(t.String({ examples: ["jake"] })),
-		limit: t.Optional(t.Number({ minimum: 1, maximum: 100, examples: [20] })),
-		offset: t.Optional(t.Number({ minimum: 0, examples: [0] })),
-	}),
-	FeedQuery: t.Object({
-		limit: t.Optional(t.Number({ minimum: 1, maximum: 100, examples: [20] })),
-		offset: t.Optional(t.Number({ minimum: 0, examples: [0] })),
 	}),
 });

@@ -1,13 +1,13 @@
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
-import { RealWorldError, assertNoConflicts } from "@/shared/errors";
+import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { users } from "@/users/users.schema";
-import { desc, eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { sift } from "radashi";
-import { articlesModel } from "./articles.model";
+import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
 import { generateSlug, toArticleResponse, toArticlesResponse } from "./mappers";
 
@@ -93,7 +93,7 @@ export const articlesPlugin = new Elysia()
 						description:
 							"Returns most recent articles globally by default, provide tag, author or favorited query parameter to filter results",
 					},
-					query: "ArticleQuery",
+					query: ArticleQuery,
 					response: "ArticlesResponse",
 				},
 			)
@@ -151,7 +151,7 @@ export const articlesPlugin = new Elysia()
 							"Can also take limit and offset query parameters like List Articles. Authentication required, will return multiple articles created by followed users, ordered by most recent first.",
 						security: [{ tokenAuth: [] }],
 					},
-					query: "FeedQuery",
+					query: FeedQuery,
 					response: "ArticlesResponse",
 					auth: true,
 				},
