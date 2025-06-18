@@ -9,7 +9,11 @@ import { StatusCodes } from "http-status-codes";
 import { sift } from "radashi";
 import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
-import { generateSlug, toArticleResponse, toArticlesResponse } from "./mappers";
+import {
+	generateSlug as slugify,
+	toArticleResponse,
+	toArticlesResponse,
+} from "./mappers";
 
 export const articlesPlugin = new Elysia()
 	.use(auth)
@@ -100,12 +104,6 @@ export const articlesPlugin = new Elysia()
 			.get(
 				"/feed",
 				async ({ query, auth: { jwtPayload } }) => {
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
-					}
-
 					const { limit = 20, offset = 0 } = query;
 
 					// Get articles from followed authors using relational queries
@@ -159,21 +157,14 @@ export const articlesPlugin = new Elysia()
 			.post(
 				"/",
 				async ({ body: { article }, auth: { jwtPayload } }) => {
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
-					}
-
-					// Generate unique slug
-					let slug = generateSlug(article.title);
+					let slug = slugify(article.title);
 					let counter = 1;
 					while (true) {
 						const existing = await db.query.articles.findFirst({
 							where: eq(articles.slug, slug),
 						});
 						if (!existing) break;
-						slug = `${generateSlug(article.title)}-${counter}`;
+						slug = `${slugify(article.title)}-${counter}`;
 						counter++;
 					}
 
@@ -312,12 +303,6 @@ export const articlesPlugin = new Elysia()
 					body: { article },
 					auth: { jwtPayload },
 				}) => {
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
-					}
-
 					// Check article exists and user owns it
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -336,14 +321,14 @@ export const articlesPlugin = new Elysia()
 					// Generate new slug if title changed
 					let newSlug = existingArticle.slug;
 					if (article.title && article.title !== existingArticle.title) {
-						newSlug = generateSlug(article.title);
+						newSlug = slugify(article.title);
 						let counter = 1;
 						while (true) {
 							const existing = await db.query.articles.findFirst({
 								where: eq(articles.slug, newSlug),
 							});
 							if (!existing || existing.id === existingArticle.id) break;
-							newSlug = `${generateSlug(article.title)}-${counter}`;
+							newSlug = `${slugify(article.title)}-${counter}`;
 							counter++;
 						}
 					}
@@ -448,12 +433,6 @@ export const articlesPlugin = new Elysia()
 			.delete(
 				"/:slug",
 				async ({ params: { slug }, auth: { jwtPayload } }) => {
-					if (!jwtPayload) {
-						throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
-							token: ["is required"],
-						});
-					}
-
 					// Check article exists and user owns it
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
