@@ -6,6 +6,7 @@ import { users } from "@/users/users.schema";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { sift } from "radashi";
 import { articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
 import { generateSlug, toArticleResponse, toArticlesResponse } from "./mappers";
@@ -40,11 +41,11 @@ export const articlesPlugin = new Elysia()
 							const conditions = [];
 
 							if (tag) {
-								conditions.push(eq(articles.tags.tag.name, tag));
+								conditions.push(eq(articleTags.tagId, tag));
 							}
 
 							if (authorUsername) {
-								conditions.push(eq(articles.author.username, authorUsername));
+								conditions.push(eq(articles.authorId, authorUsername));
 							}
 
 							if (favoritedByUsername) {
@@ -249,10 +250,16 @@ export const articlesPlugin = new Elysia()
 								.insert(tags)
 								.values({ name: tagName })
 								.returning();
+							if (!newTag) {
+								console.error(
+									"Unexpected error: Could not create tag",
+									tagName,
+								);
+							}
 							return newTag;
 						});
 
-						const createdTags = await Promise.all(tagPromises);
+						const createdTags = sift(await Promise.all(tagPromises));
 
 						// Associate tags with article
 						await db.insert(articleTags).values(
@@ -418,10 +425,16 @@ export const articlesPlugin = new Elysia()
 									.insert(tags)
 									.values({ name: tagName })
 									.returning();
+								if (!newTag) {
+									console.error(
+										"Unexpected error: Could not create tag",
+										tagName,
+									);
+								}
 								return newTag;
 							});
 
-							const createdTags = await Promise.all(tagPromises);
+							const createdTags = sift(await Promise.all(tagPromises));
 
 							await db.insert(articleTags).values(
 								createdTags.map((tag) => ({
