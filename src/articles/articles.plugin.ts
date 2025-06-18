@@ -12,7 +12,9 @@ import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
 import { toArticlesResponse, toResponse } from "./mappers";
 
-export const articlesPlugin = new Elysia()
+export const articlesPlugin = new Elysia({
+	tags: ["Articles"],
+})
 	.use(auth)
 	.use(articlesModel)
 	.group("/articles", (app) =>

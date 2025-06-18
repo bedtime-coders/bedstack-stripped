@@ -9,7 +9,9 @@ import { toResponse } from "./mappers";
 import { profilesModel } from "./profiles.model";
 import { follows } from "./profiles.schema";
 
-export const profilesPlugin = new Elysia()
+export const profilesPlugin = new Elysia({
+	tags: ["Profiles"],
+})
 	.use(auth)
 	.use(profilesModel)
 	.group(
