@@ -1,19 +1,16 @@
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
 import type { users } from "@/users/users.schema";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { type InferSelectModel, and, count, eq, inArray } from "drizzle-orm";
 import { type articles, favorites, type tags } from "../articles.schema";
 
-type ArticleWithAuthor = typeof articles.$inferSelect & {
-	author: typeof users.$inferSelect;
-};
-
-type ArticleWithAuthorAndTags = ArticleWithAuthor & {
-	tags: Array<typeof tags.$inferSelect>;
-};
-
 export async function toArticlesResponse(
-	articlesWithData: Array<ArticleWithAuthorAndTags>,
+	articlesWithData: Array<
+		InferSelectModel<typeof articles> & {
+			author: InferSelectModel<typeof users>;
+			tags: Array<InferSelectModel<typeof tags>>;
+		}
+	>,
 	currentUserId?: string,
 ): Promise<{
 	articles: Array<{
