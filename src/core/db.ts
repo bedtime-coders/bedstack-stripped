@@ -1,3 +1,13 @@
+import {
+	articleTags,
+	articleTagsRelations,
+	articles,
+	articlesRelations,
+	favorites,
+	favoritesRelations,
+	tags,
+	tagsRelations,
+} from "@/articles/articles.schema";
 import { follows } from "@/profiles/profiles.schema";
 import { users } from "@/users/users.schema";
 import { drizzle } from "drizzle-orm/bun-sql";
@@ -7,6 +17,14 @@ export const db = drizzle(env.DATABASE_URL, {
 	schema: {
 		users,
 		follows,
+		articles,
+		tags,
+		articleTags,
+		favorites,
+		articlesRelations,
+		tagsRelations,
+		articleTagsRelations,
+		favoritesRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });

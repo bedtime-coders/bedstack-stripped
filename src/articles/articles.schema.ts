@@ -1,0 +1,116 @@
+import { users } from "@/users/users.schema";
+import { sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
+import {
+	check,
+	index,
+	pgTable,
+	primaryKey,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
+
+export const articles = pgTable(
+	"articles",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		slug: text("slug").notNull().unique(),
+		title: text("title").notNull(),
+		description: text("description").notNull(),
+		body: text("body").notNull(),
+		authorId: uuid("author_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at")
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => sql`now()`),
+	},
+	(table) => [
+		index("articles_slug_idx").on(table.slug),
+		index("articles_author_id_idx").on(table.authorId),
+		index("articles_created_at_idx").on(table.createdAt),
+	],
+);
+
+export const tags = pgTable(
+	"tags",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		name: text("name").notNull().unique(),
+	},
+	(table) => [index("tags_name_idx").on(table.name)],
+);
+
+export const articleTags = pgTable(
+	"article_tags",
+	{
+		articleId: uuid("article_id")
+			.notNull()
+			.references(() => articles.id, { onDelete: "cascade" }),
+		tagId: uuid("tag_id")
+			.notNull()
+			.references(() => tags.id, { onDelete: "cascade" }),
+	},
+	(table) => [
+		primaryKey({ columns: [table.articleId, table.tagId] }),
+		index("article_tags_article_id_idx").on(table.articleId),
+		index("article_tags_tag_id_idx").on(table.tagId),
+	],
+);
+
+export const favorites = pgTable(
+	"favorites",
+	{
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		articleId: uuid("article_id")
+			.notNull()
+			.references(() => articles.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.userId, table.articleId] }),
+		index("favorites_user_id_idx").on(table.userId),
+		index("favorites_article_id_idx").on(table.articleId),
+	],
+);
+
+// Relations
+export const articlesRelations = relations(articles, ({ one, many }) => ({
+	author: one(users, {
+		fields: [articles.authorId],
+		references: [users.id],
+	}),
+	tags: many(articleTags),
+	favorites: many(favorites),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+	articleTags: many(articleTags),
+}));
+
+export const articleTagsRelations = relations(articleTags, ({ one }) => ({
+	article: one(articles, {
+		fields: [articleTags.articleId],
+		references: [articles.id],
+	}),
+	tag: one(tags, {
+		fields: [articleTags.tagId],
+		references: [tags.id],
+	}),
+}));
+
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+	user: one(users, {
+		fields: [favorites.userId],
+		references: [users.id],
+	}),
+	article: one(articles, {
+		fields: [favorites.articleId],
+		references: [articles.id],
+	}),
+}));
