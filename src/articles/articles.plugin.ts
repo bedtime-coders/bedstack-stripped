@@ -99,6 +99,43 @@ export const articlesPlugin = new Elysia()
 				},
 			)
 			.get(
+				"/:slug",
+				async ({ params: { slug }, auth: { jwtPayload } }) => {
+					const articleWithData = await db.query.articles.findFirst({
+						where: eq(articles.slug, slug),
+						with: {
+							author: true,
+							tags: {
+								with: {
+									tag: true,
+								},
+							},
+						},
+					});
+
+					if (!articleWithData) {
+						throw new NotFoundError("article");
+					}
+
+					return toResponse(articleWithData, jwtPayload?.uid);
+				},
+				{
+					detail: {
+						summary: "Get Article",
+						description:
+							"No authentication required, will return single article",
+					},
+					response: "Article",
+				},
+			)
+			.guard({
+				auth: true,
+				detail: {
+					security: [{ tokenAuth: [] }],
+					description: "Authentication required",
+				},
+			})
+			.get(
 				"/feed",
 				async ({ query, auth: { jwtPayload } }) => {
 					const { limit = 20, offset = 0 } = query;
@@ -144,11 +181,9 @@ export const articlesPlugin = new Elysia()
 						summary: "Feed Articles",
 						description:
 							"Can also take limit and offset query parameters like List Articles. Authentication required, will return multiple articles created by followed users, ordered by most recent first.",
-						security: [{ tokenAuth: [] }],
 					},
 					query: FeedQuery,
 					response: "ArticlesResponse",
-					auth: true,
 				},
 			)
 			.post(
@@ -230,7 +265,7 @@ export const articlesPlugin = new Elysia()
 					return toResponse(
 						{
 							...articleWithData,
-							tags: articleWithData.tags.map((at) => at.tag),
+							tags: articleWithData.tags,
 						},
 						jwtPayload.uid,
 					);
@@ -239,46 +274,8 @@ export const articlesPlugin = new Elysia()
 					detail: {
 						summary: "Create Article",
 						description: "Authentication required, will return an Article",
-						security: [{ tokenAuth: [] }],
 					},
 					body: "CreateArticle",
-					response: "Article",
-					auth: true,
-				},
-			)
-			.get(
-				"/:slug",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
-					const articleWithData = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
-						with: {
-							author: true,
-							tags: {
-								with: {
-									tag: true,
-								},
-							},
-						},
-					});
-
-					if (!articleWithData) {
-						throw new NotFoundError("article");
-					}
-
-					return toResponse(
-						{
-							...articleWithData,
-							tags: articleWithData.tags.map((at) => at.tag),
-						},
-						jwtPayload?.uid,
-					);
-				},
-				{
-					detail: {
-						summary: "Get Article",
-						description:
-							"No authentication required, will return single article",
-					},
 					response: "Article",
 				},
 			)
@@ -387,24 +384,16 @@ export const articlesPlugin = new Elysia()
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(
-						{
-							...articleWithData,
-							tags: articleWithData.tags.map((at) => at.tag),
-						},
-						jwtPayload.uid,
-					);
+					return toResponse(articleWithData, jwtPayload.uid);
 				},
 				{
 					detail: {
 						summary: "Update Article",
 						description:
 							"Authentication required, returns the updated Article. The slug also gets updated when the title is changed.",
-						security: [{ tokenAuth: [] }],
 					},
 					body: "UpdateArticle",
 					response: "Article",
-					auth: true,
 				},
 			)
 			.delete(
@@ -434,9 +423,7 @@ export const articlesPlugin = new Elysia()
 					detail: {
 						summary: "Delete Article",
 						description: "Authentication required",
-						security: [{ tokenAuth: [] }],
 					},
-					auth: true,
 				},
 			),
 	);

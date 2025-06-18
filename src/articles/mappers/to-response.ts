@@ -13,7 +13,9 @@ import { type articles, favorites, type tags } from "../articles.schema";
 export async function toResponse(
 	article: InferSelectModel<typeof articles> & {
 		author: InferSelectModel<typeof users>;
-		tags: Array<InferSelectModel<typeof tags>>;
+		tags: Array<{
+			tag: InferSelectModel<typeof tags>;
+		}>;
 	},
 	currentUserId?: string,
 ): Promise<{
@@ -74,7 +76,7 @@ export async function toResponse(
 			title: article.title,
 			description: article.description,
 			body: article.body,
-			tagList: article.tags.map((tag) => tag.name),
+			tagList: article.tags.map(({ tag }) => tag.name),
 			createdAt: article.createdAt.toISOString(),
 			updatedAt: article.updatedAt.toISOString(),
 			favorited,
