@@ -422,7 +422,6 @@ export const articlesPlugin = new Elysia()
 				{
 					detail: {
 						summary: "Delete Article",
-						description: "Authentication required",
 					},
 				},
 			),
