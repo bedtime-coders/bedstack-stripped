@@ -178,12 +178,9 @@ export const articlesPlugin = new Elysia()
 					if (article.tagList && article.tagList.length > 0) {
 						// Create or get existing tags
 						const tagPromises = article.tagList.map(async (tagName) => {
-							const [existingTag] = await db
-								.insert(tags)
-								.values({ name: tagName })
-								.onConflictDoNothing()
-								.returning();
-
+							const existingTag = await db.query.tags.findFirst({
+								where: eq(tags.name, tagName),
+							});
 							if (existingTag) {
 								return existingTag;
 							}
@@ -192,6 +189,7 @@ export const articlesPlugin = new Elysia()
 								.insert(tags)
 								.values({ name: tagName })
 								.returning();
+
 							if (!newTag) {
 								console.error(
 									"Unexpected error: Could not create tag",
