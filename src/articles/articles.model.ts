@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 
 export const ArticleQuery = t.Object({
-	tag: t.Optional(t.String({ examples: ["AngularJS"] })),
+	tag: t.Optional(t.String({ examples: ["angularjs"] })),
 	author: t.Optional(t.String({ examples: ["jake"] })),
 	favorited: t.Optional(t.String({ examples: ["jake"] })),
 	limit: t.Optional(t.Number({ minimum: 1, maximum: 100, examples: [20] })),
