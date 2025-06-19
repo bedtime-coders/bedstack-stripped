@@ -1,6 +1,7 @@
 import { articlesPlugin } from "@/articles/articles.plugin";
 import { commentsPlugin } from "@/comments/comments.plugin";
 import { profilesPlugin } from "@/profiles/profiles.plugin";
+import { tagsPlugin } from "@/tags/tags.plugin";
 import { usersPlugin } from "@/users/users.plugin";
 import { Elysia } from "elysia";
 import { errors, openapi } from "./plugins";
@@ -13,5 +14,6 @@ export const app = new Elysia()
 			.use(usersPlugin)
 			.use(profilesPlugin)
 			.use(articlesPlugin)
-			.use(commentsPlugin),
+			.use(commentsPlugin)
+			.use(tagsPlugin),
 	);

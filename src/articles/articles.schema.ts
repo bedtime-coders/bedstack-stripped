@@ -1,3 +1,4 @@
+import { articleTags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -34,32 +35,6 @@ export const articles = pgTable(
 	],
 );
 
-export const tags = pgTable(
-	"tags",
-	{
-		id: uuid("id").primaryKey().defaultRandom(),
-		name: text("name").notNull().unique(),
-	},
-	(table) => [index("tags_name_idx").on(table.name)],
-);
-
-export const articleTags = pgTable(
-	"article_tags",
-	{
-		articleId: uuid("article_id")
-			.notNull()
-			.references(() => articles.id, { onDelete: "cascade" }),
-		tagId: uuid("tag_id")
-			.notNull()
-			.references(() => tags.id, { onDelete: "cascade" }),
-	},
-	(table) => [
-		primaryKey({ columns: [table.articleId, table.tagId] }),
-		index("article_tags_article_id_idx").on(table.articleId),
-		index("article_tags_tag_id_idx").on(table.tagId),
-	],
-);
-
 export const favorites = pgTable(
 	"favorites",
 	{
@@ -85,21 +60,6 @@ export const articlesRelations = relations(articles, ({ one, many }) => ({
 	}),
 	tags: many(articleTags),
 	favorites: many(favorites),
-}));
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-	articleTags: many(articleTags),
-}));
-
-export const articleTagsRelations = relations(articleTags, ({ one }) => ({
-	article: one(articles, {
-		fields: [articleTags.articleId],
-		references: [articles.id],
-	}),
-	tag: one(tags, {
-		fields: [articleTags.tagId],
-		references: [tags.id],
-	}),
 }));
 
 export const favoritesRelations = relations(favorites, ({ one }) => ({

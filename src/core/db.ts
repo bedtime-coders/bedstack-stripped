@@ -1,15 +1,17 @@
 import {
-	articleTags,
-	articleTagsRelations,
 	articles,
 	articlesRelations,
 	favorites,
 	favoritesRelations,
-	tags,
-	tagsRelations,
 } from "@/articles/articles.schema";
 import { comments, commentsRelations } from "@/comments/comments.schema";
 import { follows } from "@/profiles/profiles.schema";
+import {
+	articleTags,
+	articleTagsRelations,
+	tags,
+	tagsRelations,
+} from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 import { drizzle } from "drizzle-orm/bun-sql";
 import { env } from "./env";
