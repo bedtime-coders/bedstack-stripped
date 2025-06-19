@@ -1,3 +1,4 @@
+import { articleTags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -57,6 +58,7 @@ export const articlesRelations = relations(articles, ({ one, many }) => ({
 		fields: [articles.authorId],
 		references: [users.id],
 	}),
+	tags: many(articleTags),
 	favorites: many(favorites),
 }));
 
