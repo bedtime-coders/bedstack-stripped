@@ -529,5 +529,135 @@ export const articlesPlugin = new Elysia({
 						summary: "Delete Article",
 					},
 				},
+			)
+			.guard({
+				auth: true,
+				detail: {
+					security: [{ tokenAuth: [] }],
+					description: "Authentication required",
+				},
+			})
+			.post(
+				"/:slug/favorite",
+				async ({ params: { slug }, auth: { jwtPayload } }) => {
+					// Verify article exists
+					const existingArticle = await db.query.articles.findFirst({
+						where: eq(articles.slug, slug),
+					});
+
+					if (!existingArticle) {
+						throw new NotFoundError("article");
+					}
+
+					// Check if already favorited
+					const existingFavorite = await db.query.favorites.findFirst({
+						where: and(
+							eq(favorites.userId, jwtPayload.uid),
+							eq(favorites.articleId, existingArticle.id),
+						),
+					});
+
+					if (existingFavorite) {
+						// Already favorited, return the article as-is
+						const articleWithData = await db.query.articles.findFirst({
+							where: eq(articles.id, existingArticle.id),
+							with: {
+								author: true,
+								tags: {
+									with: {
+										tag: true,
+									},
+								},
+							},
+						});
+
+						if (!articleWithData) {
+							throw new NotFoundError("article");
+						}
+
+						return toResponse(articleWithData, jwtPayload.uid);
+					}
+
+					// Add to favorites
+					await db.insert(favorites).values({
+						userId: jwtPayload.uid,
+						articleId: existingArticle.id,
+					});
+
+					// Get article with author and tags
+					const articleWithData = await db.query.articles.findFirst({
+						where: eq(articles.id, existingArticle.id),
+						with: {
+							author: true,
+							tags: {
+								with: {
+									tag: true,
+								},
+							},
+						},
+					});
+
+					if (!articleWithData) {
+						throw new NotFoundError("article");
+					}
+
+					return toResponse(articleWithData, jwtPayload.uid);
+				},
+				{
+					detail: {
+						summary: "Favorite Article",
+						description: "Authentication required, returns the Article",
+					},
+					response: "Article",
+				},
+			)
+			.delete(
+				"/:slug/favorite",
+				async ({ params: { slug }, auth: { jwtPayload } }) => {
+					// Verify article exists
+					const existingArticle = await db.query.articles.findFirst({
+						where: eq(articles.slug, slug),
+					});
+
+					if (!existingArticle) {
+						throw new NotFoundError("article");
+					}
+
+					// Remove from favorites
+					await db
+						.delete(favorites)
+						.where(
+							and(
+								eq(favorites.userId, jwtPayload.uid),
+								eq(favorites.articleId, existingArticle.id),
+							),
+						);
+
+					// Get article with author and tags
+					const articleWithData = await db.query.articles.findFirst({
+						where: eq(articles.id, existingArticle.id),
+						with: {
+							author: true,
+							tags: {
+								with: {
+									tag: true,
+								},
+							},
+						},
+					});
+
+					if (!articleWithData) {
+						throw new NotFoundError("article");
+					}
+
+					return toResponse(articleWithData, jwtPayload.uid);
+				},
+				{
+					detail: {
+						summary: "Unfavorite Article",
+						description: "Authentication required, returns the Article",
+					},
+					response: "Article",
+				},
 			),
 	);

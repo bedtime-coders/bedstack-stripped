@@ -2,19 +2,10 @@ import { articles } from "@/articles/articles.schema";
 import { db } from "@/core/db";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
-import { users } from "@/users/users.schema";
-import chalk from "chalk";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import {
-	CommentIdParam,
-	CommentResponse,
-	CommentsResponse,
-	CreateComment,
-	UUID,
-	commentsModel,
-} from "./comments.model";
+import { UUID, commentsModel } from "./comments.model";
 import { comments } from "./comments.schema";
 import {
 	toCommentResponse,
