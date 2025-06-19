@@ -92,6 +92,10 @@ export const tagsRelations = relations(tags, ({ many }) => ({
 }));
 
 export const articleTagsRelations = relations(articleTags, ({ one }) => ({
+	article: one(articles, {
+		fields: [articleTags.articleId],
+		references: [articles.id],
+	}),
 	tag: one(tags, {
 		fields: [articleTags.tagId],
 		references: [tags.id],

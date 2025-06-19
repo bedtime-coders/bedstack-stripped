@@ -1,6 +1,5 @@
 import {
 	articleTags,
-	articleTagsRelations,
 	articles,
 	articlesRelations,
 	favorites,
@@ -22,7 +21,6 @@ export const db = drizzle(env.DATABASE_URL, {
 		favorites,
 		articlesRelations,
 		tagsRelations,
-		articleTagsRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });
