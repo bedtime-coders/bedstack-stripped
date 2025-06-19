@@ -142,6 +142,10 @@ export const commentsPlugin = new Elysia({
 						throw new NotFoundError("comment");
 					}
 
+					if (existingComment.articleId !== article.id) {
+						throw new NotFoundError("comment");
+					}
+
 					if (existingComment.authorId !== jwtPayload.uid) {
 						throw new RealWorldError(StatusCodes.FORBIDDEN, {
 							comment: ["you can only delete your own comments"],
