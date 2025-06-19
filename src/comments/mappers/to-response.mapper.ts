@@ -18,15 +18,17 @@ export async function toCommentResponse(
 	currentUserId?: string,
 	followingStatus?: boolean,
 ): Promise<{
-	id: string;
-	createdAt: string;
-	updatedAt: string;
-	body: string;
-	author: {
-		username: string;
-		bio: string | null;
-		image: string | null;
-		following: boolean;
+	comment: {
+		id: string;
+		createdAt: string;
+		updatedAt: string;
+		body: string;
+		author: {
+			username: string;
+			bio: string | null;
+			image: string | null;
+			following: boolean;
+		};
 	};
 }> {
 	let following = false;
@@ -55,15 +57,17 @@ export async function toCommentResponse(
 	}
 
 	return {
-		id: comment.id,
-		createdAt: comment.createdAt.toISOString(),
-		updatedAt: comment.updatedAt.toISOString(),
-		body: comment.body,
-		author: {
-			username: comment.author.username,
-			bio: comment.author.bio,
-			image: comment.author.image,
-			following,
+		comment: {
+			id: comment.id,
+			createdAt: comment.createdAt.toISOString(),
+			updatedAt: comment.updatedAt.toISOString(),
+			body: comment.body,
+			author: {
+				username: comment.author.username,
+				bio: comment.author.bio,
+				image: comment.author.image,
+				following,
+			},
 		},
 	};
 }
@@ -138,7 +142,7 @@ export async function toCommentsResponse(
 				currentUserId,
 				following,
 			);
-			return response;
+			return response.comment;
 		}),
 	);
 

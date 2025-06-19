@@ -1,6 +1,5 @@
 import { db } from "@/core/db";
-import { Elysia } from "elysia";
-import { tags } from "./tags.schema";
+import { Elysia, t } from "elysia";
 
 export const tagsPlugin = new Elysia({
 	tags: ["Tags"],
@@ -16,9 +15,11 @@ export const tagsPlugin = new Elysia({
 		detail: {
 			summary: "Get Tags",
 			description: "Returns a list of all tags. No authentication required.",
-			response: {
-				tags: ["reactjs", "angularjs"],
-			},
+			response: t.Object({
+				tags: t.Array(t.String(), {
+					examples: [["reactjs", "angularjs", "dragons"]],
+				}),
+			}),
 		},
 	},
 );

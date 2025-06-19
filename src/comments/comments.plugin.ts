@@ -114,7 +114,7 @@ export const commentsPlugin = new Elysia({
 			)
 			.delete(
 				"/:id",
-				async ({ params: { slug, id }, auth: { jwtPayload } }) => {
+				async ({ params: { slug, id }, auth: { jwtPayload }, set }) => {
 					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -146,7 +146,7 @@ export const commentsPlugin = new Elysia({
 					// Delete comment
 					await db.delete(comments).where(eq(comments.id, id));
 
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
+					set.status = StatusCodes.NO_CONTENT;
 				},
 				{
 					detail: {
@@ -154,6 +154,9 @@ export const commentsPlugin = new Elysia({
 						description: "Delete a comment for an article. Auth is required",
 					},
 					params: t.Object({ id: UUID, slug: t.String() }),
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void(),
+					},
 				},
 			),
 	);
