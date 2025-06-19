@@ -4,6 +4,7 @@ import {
 	articles,
 	articlesRelations,
 	favorites,
+	favoritesRelations,
 	tags,
 	tagsRelations,
 } from "@/articles/articles.schema";
@@ -23,6 +24,7 @@ export const db = drizzle(env.DATABASE_URL, {
 		articlesRelations,
 		tagsRelations,
 		articleTagsRelations,
+		favoritesRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });

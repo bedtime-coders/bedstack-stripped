@@ -1,5 +1,6 @@
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
+import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
@@ -27,8 +28,8 @@ export const articlesPlugin = new Elysia({
 						tag,
 						author: authorUsername,
 						favorited: favoritedByUsername,
-						limit = 20,
-						offset = 0,
+						limit = DEFAULT_LIMIT,
+						offset = DEFAULT_OFFSET,
 					},
 					auth: { jwtPayload },
 				}) => {
@@ -186,11 +187,36 @@ export const articlesPlugin = new Elysia({
 			})
 			.get(
 				"/feed",
-				async ({ query, auth: { jwtPayload } }) => {
-					const { limit = 20, offset = 0 } = query;
+				async ({
+					query: { limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET },
+					auth: { jwtPayload },
+				}) => {
+					const currentUserId = jwtPayload.uid;
 
-					// Get articles from followed authors using relational queries
-					const articlesWithAuthors = await db.query.articles.findMany({
+					// Step 1: Get followed user IDs
+					const followed = await db
+						.select({ followingId: follows.followingId })
+						.from(follows)
+						.where(eq(follows.followerId, currentUserId));
+
+					const followedIds = followed.map((f) => f.followingId);
+					if (followedIds.length === 0) return toArticlesResponse([]);
+
+					// Step 2: Get article IDs from followed authors
+					const articleIdsResult = await db
+						.select({ id: articles.id })
+						.from(articles)
+						.where(inArray(articles.authorId, followedIds))
+						.orderBy(desc(articles.createdAt))
+						.limit(limit)
+						.offset(offset);
+
+					const articleIds = articleIdsResult.map((a) => a.id);
+					if (articleIds.length === 0) return toArticlesResponse([]);
+
+					// Step 3: Get full article data with author and tags
+					const articlesWithNestedData = await db.query.articles.findMany({
+						where: inArray(articles.id, articleIds),
 						with: {
 							author: true,
 							tags: {
@@ -199,31 +225,48 @@ export const articlesPlugin = new Elysia({
 								},
 							},
 						},
-						where: (articles, { eq }) =>
-							eq(articles.authorId, follows.followingId),
-						orderBy: (articles, { desc }) => [desc(articles.createdAt)],
-						limit,
-						offset,
 					});
 
-					// Filter by followed authors
-					const followedUserIds = await db
-						.select({ followingId: follows.followingId })
-						.from(follows)
-						.where(eq(follows.followerId, jwtPayload.uid));
-
-					const followedIds = followedUserIds.map((f) => f.followingId);
-					const filteredArticles = articlesWithAuthors.filter((article) =>
-						followedIds.includes(article.authorId),
-					);
-
-					// Transform the data to match the expected format
-					const articlesWithData = filteredArticles.map((article) => ({
-						...article,
-						tags: article.tags.map((articleTag) => articleTag.tag.name),
+					const articlesWithData = articlesWithNestedData.map((article) => ({
+						...omit(article, ["authorId"]),
+						author: article.author,
+						tags: article.tags.map((t) => t.tag.name),
 					}));
 
-					return toArticlesResponse(articlesWithData);
+					const authorIds = articlesWithData.map((a) => a.author.id);
+
+					// Step 4: Get favorites count, user favorited, follow status
+					const [favoritesCounts, userFavorites, followStatus] =
+						await Promise.all([
+							db
+								.select({
+									articleId: favorites.articleId,
+									count: count().as("count"),
+								})
+								.from(favorites)
+								.where(inArray(favorites.articleId, articleIds))
+								.groupBy(favorites.articleId),
+							db.query.favorites.findMany({
+								columns: { articleId: true },
+								where: and(
+									eq(favorites.userId, currentUserId),
+									inArray(favorites.articleId, articleIds),
+								),
+							}),
+							db.query.follows.findMany({
+								columns: { followingId: true },
+								where: and(
+									eq(follows.followerId, currentUserId),
+									inArray(follows.followingId, authorIds),
+								),
+							}),
+						]);
+
+					return toArticlesResponse(articlesWithData, {
+						userFavorites,
+						followStatus,
+						favoritesCounts,
+					});
 				},
 				{
 					detail: {

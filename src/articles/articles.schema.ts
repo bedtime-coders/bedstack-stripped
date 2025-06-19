@@ -101,3 +101,14 @@ export const articleTagsRelations = relations(articleTags, ({ one }) => ({
 		references: [tags.id],
 	}),
 }));
+
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+	user: one(users, {
+		fields: [favorites.userId],
+		references: [users.id],
+	}),
+	article: one(articles, {
+		fields: [favorites.articleId],
+		references: [articles.id],
+	}),
+}));
