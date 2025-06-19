@@ -294,60 +294,23 @@ export const articlesPlugin = new Elysia({
 						);
 					}
 
-					let articleWithData:
-						| {
-								id: string;
-								slug: string;
-								title: string;
-								description: string;
-								body: string;
-								authorId: string;
-								createdAt: Date;
-								updatedAt: Date;
-								author: {
-									id: string;
-									username: string;
-									bio: string | null;
-									image: string | null;
-									email: string;
-									password: string;
-									createdAt: Date;
-									updatedAt: Date;
-								};
-								tags: Array<{
-									articleId: string;
-									tagId: string;
+					// Get article with author and tags
+					const articleWithData = await db.query.articles.findFirst({
+						where: eq(articles.id, createdArticle.id),
+						with: {
+							author: true,
+							tags: {
+								with: {
 									tag: {
-										id: string;
-										name: string;
-									};
-								}>;
-						  }
-						| undefined;
-					try {
-						// Get article with author and tags
-						articleWithData = await db.query.articles.findFirst({
-							where: eq(articles.id, createdArticle.id),
-							with: {
-								author: true,
-								tags: {
-									with: {
-										tag: {
-											columns: {
-												id: true,
-												name: true,
-											},
+										columns: {
+											id: true,
+											name: true,
 										},
 									},
 								},
 							},
-						});
-					} catch (error) {
-						console.error(error);
-						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
-							article: ["failed to fetch article"],
-						});
-					}
+						},
+					});
 
 					if (!articleWithData) {
 						throw new NotFoundError("article");
