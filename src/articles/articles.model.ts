@@ -121,11 +121,7 @@ export const articlesModel = new Elysia().model({
 		article: ArticleBase,
 	}),
 	ArticlesResponse: t.Object({
-		articles: t.Array(
-			t.Object({
-				article: ArticleBase,
-			}),
-		),
+		articles: t.Array(ArticleBase),
 		articlesCount: t.Number({
 			examples: [2],
 		}),

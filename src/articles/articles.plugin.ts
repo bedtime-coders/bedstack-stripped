@@ -4,10 +4,11 @@ import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
 import { users } from "@/users/users.schema";
-import { eq } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, inArray } from "drizzle-orm";
+import type { InferSelectModel, SQL } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { sift } from "radashi";
+import { omit, sift } from "radashi";
 import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articleTags, articles, favorites, tags } from "./articles.schema";
 import { toArticlesResponse, toResponse } from "./mappers";
@@ -21,74 +22,127 @@ export const articlesPlugin = new Elysia({
 		app
 			.get(
 				"/",
-				async ({ query, auth: { jwtPayload } }) => {
-					const {
+				async ({
+					query: {
 						tag,
 						author: authorUsername,
 						favorited: favoritedByUsername,
 						limit = 20,
 						offset = 0,
-					} = query;
-
-					// Get articles with authors using relational queries
-					const articlesWithAuthors = await db.query.articles.findMany({
-						with: {
-							author: true,
-							tags: {
-								with: {
-									tag: true,
-								},
-							},
-						},
-						orderBy: (articles, { desc }) => [desc(articles.createdAt)],
-						limit,
-						offset,
-					});
-
-					// Apply filters after fetching data
-					let filteredArticles = articlesWithAuthors;
-
-					if (tag) {
-						filteredArticles = filteredArticles.filter((article) =>
-							article.tags.some((articleTag) => articleTag.tag.name === tag),
-						);
+					},
+					auth: { jwtPayload },
+				}) => {
+					const currentUserId = jwtPayload?.uid;
+					const [authorUser, favoritedUser] = await Promise.all([
+						authorUsername
+							? db.query.users.findFirst({
+									where: eq(users.username, authorUsername),
+								})
+							: undefined,
+						favoritedByUsername
+							? db.query.users.findFirst({
+									where: eq(users.username, favoritedByUsername),
+								})
+							: undefined,
+					]);
+					if (
+						(authorUsername && !authorUser) ||
+						(favoritedByUsername && !favoritedUser)
+					) {
+						return toArticlesResponse([]);
 					}
 
-					if (authorUsername) {
-						filteredArticles = filteredArticles.filter(
-							(article) => article.author.username === authorUsername,
-						);
-					}
+					const rows = await db
+						.select({
+							article: getTableColumns(articles),
+							author: getTableColumns(users),
+							tag: getTableColumns(tags),
+						})
+						.from(articles)
+						.innerJoin(users, eq(articles.authorId, users.id))
+						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
+						.leftJoin(tags, eq(tags.id, articleTags.tagId))
+						.leftJoin(favorites, eq(favorites.articleId, articles.id)) // for filtering
+						.where(
+							and(
+								authorUser ? eq(articles.authorId, authorUser.id) : undefined,
+								favoritedUser
+									? eq(favorites.userId, favoritedUser.id)
+									: undefined,
+								tag ? eq(tags.name, tag) : undefined,
+							),
+						)
+						.orderBy(desc(articles.createdAt))
+						.limit(limit)
+						.offset(offset);
 
-					if (favoritedByUsername) {
-						const favoritedUser = await db.query.users.findFirst({
-							where: eq(users.username, favoritedByUsername),
-						});
-						if (!favoritedUser) {
-							throw new NotFoundError("user");
+					// Now each article can appear in multiple rows, one for each tag
+					// We need to group them by article and then transform them to the expected shape
+					const articlesMap = new Map<
+						string,
+						Omit<InferSelectModel<typeof articles>, "authorId"> & {
+							author: InferSelectModel<typeof users>;
+							tags: string[];
 						}
-
-						const favoritedArticleIds = await db
-							.select({ articleId: favorites.articleId })
-							.from(favorites)
-							.where(eq(favorites.userId, favoritedUser.id));
-
-						const favoritedIds = favoritedArticleIds.map((f) => f.articleId);
-						filteredArticles = filteredArticles.filter((article) =>
-							favoritedIds.includes(article.id),
-						);
+					>();
+					for (const row of rows) {
+						const articleId = row.article.id;
+						if (!articlesMap.has(articleId)) {
+							articlesMap.set(articleId, {
+								...omit(row.article, ["authorId"]),
+								author: row.author,
+								tags: [],
+							});
+						}
+						const tagName = row.tag?.name;
+						if (!tagName) continue;
+						const article = articlesMap.get(articleId);
+						if (!article) continue;
+						if (article.tags.includes(tagName)) continue;
+						article.tags.push(tagName);
 					}
 
-					// Get tags for all articles (already included in the query above)
-					// No need for separate tag query since we have the data
+					const articleIds = Array.from(articlesMap.keys());
+					const articlesWithData = Array.from(articlesMap.values());
+					const authorIds = articlesWithData.map((a) => a.author.id);
 
-					// Transform the data to match the expected format
-					const articlesWithData = filteredArticles.map((article) => ({
-						...article,
-						tags: article.tags.map((articleTag) => articleTag.tag),
-					}));
+					//  Handle extras (favorites, author following)
+					const [favoritesCounts, userFavorites, followStatus] =
+						await Promise.all([
+							db
+								.select({ articleId: favorites.articleId, count: count() })
+								.from(favorites)
+								.where(inArray(favorites.articleId, articleIds))
+								.groupBy(favorites.articleId),
+							currentUserId
+								? db
+										.select({ articleId: favorites.articleId })
+										.from(favorites)
+										.where(
+											and(
+												eq(favorites.userId, currentUserId),
+												inArray(favorites.articleId, articleIds),
+											),
+										)
+								: [],
+							currentUserId
+								? db
+										.select({ followingId: follows.followingId })
+										.from(follows)
+										.where(
+											and(
+												eq(follows.followerId, currentUserId),
+												inArray(follows.followingId, authorIds),
+											),
+										)
+								: [],
+						]);
 
-					return toArticlesResponse(articlesWithData, jwtPayload?.uid);
+					return toArticlesResponse(articlesWithData, {
+						userFavorites,
+						followStatus,
+						favoritesCounts,
+					});
 				},
 				{
 					detail: {
@@ -173,10 +227,10 @@ export const articlesPlugin = new Elysia({
 					// Transform the data to match the expected format
 					const articlesWithData = filteredArticles.map((article) => ({
 						...article,
-						tags: article.tags.map((articleTag) => articleTag.tag),
+						tags: article.tags.map((articleTag) => articleTag.tag.name),
 					}));
 
-					return toArticlesResponse(articlesWithData, jwtPayload.uid);
+					return toArticlesResponse(articlesWithData);
 				},
 				{
 					detail: {
