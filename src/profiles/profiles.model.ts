@@ -18,9 +18,4 @@ export const profilesModel = new Elysia().model({
 			}),
 		}),
 	}),
-	Username: t.Object({
-		username: t.String({
-			examples: ["jake"],
-		}),
-	}),
 });

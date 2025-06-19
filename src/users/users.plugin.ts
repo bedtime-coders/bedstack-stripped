@@ -8,7 +8,9 @@ import { toResponse } from "./mappers";
 import { usersModel } from "./users.model";
 import { users } from "./users.schema";
 
-export const usersPlugin = new Elysia()
+export const usersPlugin = new Elysia({
+	tags: ["Users"],
+})
 	.use(auth)
 	.use(usersModel)
 	.group("/users", (app) =>

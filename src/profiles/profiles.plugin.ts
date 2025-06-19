@@ -9,7 +9,9 @@ import { toResponse } from "./mappers";
 import { profilesModel } from "./profiles.model";
 import { follows } from "./profiles.schema";
 
-export const profilesPlugin = new Elysia()
+export const profilesPlugin = new Elysia({
+	tags: ["Profiles"],
+})
 	.use(auth)
 	.use(profilesModel)
 	.group(
@@ -29,10 +31,7 @@ export const profilesPlugin = new Elysia()
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
-
-						if (!user) {
-							throw new NotFoundError("profile");
-						}
+						if (!user) throw new NotFoundError("profile");
 
 						let following = false;
 						if (jwtPayload) {
@@ -44,7 +43,6 @@ export const profilesPlugin = new Elysia()
 							});
 							following = Boolean(follow);
 						}
-
 						return toResponse(user, following);
 					},
 					{
@@ -56,23 +54,25 @@ export const profilesPlugin = new Elysia()
 						response: "Profile",
 					},
 				)
+				.guard({
+					auth: true,
+					detail: {
+						security: [{ tokenAuth: [] }],
+						description: "Authentication required",
+					},
+				})
 				.post(
 					"/:username/follow",
 					async ({ params: { username }, auth: { jwtPayload } }) => {
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
-
-						if (!user) {
-							throw new NotFoundError("profile");
-						}
-
+						if (!user) throw new NotFoundError("profile");
 						if (user.id === jwtPayload.uid) {
 							throw new RealWorldError(StatusCodes.UNPROCESSABLE_ENTITY, {
 								profile: ["cannot be followed by yourself"],
 							});
 						}
-
 						await db
 							.insert(follows)
 							.values({
@@ -80,7 +80,6 @@ export const profilesPlugin = new Elysia()
 								followingId: user.id,
 							})
 							.onConflictDoNothing();
-
 						return toResponse(user, true);
 					},
 					{
@@ -88,10 +87,8 @@ export const profilesPlugin = new Elysia()
 							summary: "Follow user",
 							description:
 								"Authentication required, returns a [Profile](docs#model/profile)",
-							security: [{ tokenAuth: [] }],
 						},
 						response: "Profile",
-						auth: true,
 					},
 				)
 				.delete(
@@ -100,17 +97,12 @@ export const profilesPlugin = new Elysia()
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
-
-						if (!user) {
-							throw new NotFoundError("profile");
-						}
-
+						if (!user) throw new NotFoundError("profile");
 						if (user.id === jwtPayload.uid) {
 							throw new RealWorldError(StatusCodes.UNPROCESSABLE_ENTITY, {
 								profile: ["cannot be unfollowed by yourself"],
 							});
 						}
-
 						await db
 							.delete(follows)
 							.where(
@@ -119,7 +111,6 @@ export const profilesPlugin = new Elysia()
 									eq(follows.followingId, user.id),
 								),
 							);
-
 						return toResponse(user, false);
 					},
 					{
@@ -127,10 +118,8 @@ export const profilesPlugin = new Elysia()
 							summary: "Unfollow user",
 							description:
 								"Authentication required, returns a [Profile](docs#model/profile)",
-							security: [{ tokenAuth: [] }],
 						},
 						response: "Profile",
-						auth: true,
 					},
 				),
 	);
