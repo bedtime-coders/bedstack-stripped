@@ -52,6 +52,30 @@ export const articlesPlugin = new Elysia({
 						return toArticlesResponse([]);
 					}
 
+					const paginatedArticleIds = await db
+						.select({ id: articles.id })
+						.from(articles)
+						.innerJoin(users, eq(articles.authorId, users.id))
+						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
+						.leftJoin(tags, eq(tags.id, articleTags.tagId))
+						.leftJoin(favorites, eq(favorites.articleId, articles.id))
+						.where(
+							and(
+								authorUser ? eq(articles.authorId, authorUser.id) : undefined,
+								favoritedUser
+									? eq(favorites.userId, favoritedUser.id)
+									: undefined,
+								tag ? eq(tags.name, tag) : undefined,
+							),
+						)
+						.groupBy(articles.id) // Ensure 1 row per article
+						.orderBy(desc(articles.createdAt))
+						.limit(limit)
+						.offset(offset);
+
+					const articleIds = paginatedArticleIds.map((row) => row.id);
+					if (articleIds.length === 0) return toArticlesResponse([]);
+
 					const rows = await db
 						.select({
 							article: getTableColumns(articles),
@@ -62,19 +86,7 @@ export const articlesPlugin = new Elysia({
 						.innerJoin(users, eq(articles.authorId, users.id))
 						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
 						.leftJoin(tags, eq(tags.id, articleTags.tagId))
-						.leftJoin(favorites, eq(favorites.articleId, articles.id)) // for filtering
-						.where(
-							and(
-								authorUser ? eq(articles.authorId, authorUser.id) : undefined,
-								favoritedUser
-									? eq(favorites.userId, favoritedUser.id)
-									: undefined,
-								tag ? eq(tags.name, tag) : undefined,
-							),
-						)
-						.orderBy(desc(articles.createdAt))
-						.limit(limit)
-						.offset(offset);
+						.where(inArray(articles.id, articleIds));
 
 					// Now each article can appear in multiple rows, one for each tag
 					// We need to group them by article and then transform them to the expected shape
@@ -102,7 +114,6 @@ export const articlesPlugin = new Elysia({
 						article.tags.push(tagName);
 					}
 
-					const articleIds = Array.from(articlesMap.keys());
 					const articlesWithData = Array.from(articlesMap.values());
 					const authorIds = articlesWithData.map((a) => a.author.id);
 
