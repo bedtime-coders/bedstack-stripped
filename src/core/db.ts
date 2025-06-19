@@ -8,6 +8,7 @@ import {
 	tags,
 	tagsRelations,
 } from "@/articles/articles.schema";
+import { comments, commentsRelations } from "@/comments/comments.schema";
 import { follows } from "@/profiles/profiles.schema";
 import { users } from "@/users/users.schema";
 import { drizzle } from "drizzle-orm/bun-sql";
@@ -21,10 +22,12 @@ export const db = drizzle(env.DATABASE_URL, {
 		tags,
 		articleTags,
 		favorites,
+		comments,
 		articlesRelations,
 		tagsRelations,
 		articleTagsRelations,
 		favoritesRelations,
+		commentsRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });
