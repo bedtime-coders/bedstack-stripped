@@ -31,16 +31,22 @@ export async function toCommentResponse(
 }> {
 	let following = false;
 	if (currentUserId && currentUserId !== comment.author.id) {
-		const [follow] = await db
-			.select()
-			.from(follows)
-			.where(
-				and(
-					eq(follows.followerId, currentUserId),
-					eq(follows.followingId, comment.author.id),
-				),
-			);
-		following = Boolean(follow);
+		try {
+			const [follow] = await db
+				.select()
+				.from(follows)
+				.where(
+					and(
+						eq(follows.followerId, currentUserId),
+						eq(follows.followingId, comment.author.id),
+					),
+				);
+			following = Boolean(follow);
+		} catch (error) {
+			console.error("Error checking follow relationship:", error);
+			// Set safe default value to prevent operation failure
+			following = false;
+		}
 	}
 
 	return {
