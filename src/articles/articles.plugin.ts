@@ -33,6 +33,8 @@ export const articlesPlugin = new Elysia({
 					auth: { jwtPayload },
 				}) => {
 					const currentUserId = jwtPayload?.uid;
+
+					// Preload filter IDs using relational API
 					const [authorUser, favoritedUser] = await Promise.all([
 						authorUsername
 							? db.query.users.findFirst({
@@ -45,6 +47,7 @@ export const articlesPlugin = new Elysia({
 								})
 							: undefined,
 					]);
+
 					if (
 						(authorUsername && !authorUser) ||
 						(favoritedByUsername && !favoritedUser)
@@ -52,10 +55,10 @@ export const articlesPlugin = new Elysia({
 						return toArticlesResponse([]);
 					}
 
-					const paginatedArticleIds = await db
+					// Step 1: Fetch article IDs using a relational-aware filter
+					const filteredArticleIds = await db
 						.select({ id: articles.id })
 						.from(articles)
-						.innerJoin(users, eq(articles.authorId, users.id))
 						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
 						.leftJoin(tags, eq(tags.id, articleTags.tagId))
 						.leftJoin(favorites, eq(favorites.articleId, articles.id))
@@ -68,84 +71,63 @@ export const articlesPlugin = new Elysia({
 								tag ? eq(tags.name, tag) : undefined,
 							),
 						)
-						.groupBy(articles.id) // Ensure 1 row per article
+						.groupBy(articles.id)
 						.orderBy(desc(articles.createdAt))
 						.limit(limit)
 						.offset(offset);
 
-					const articleIds = paginatedArticleIds.map((row) => row.id);
+					const articleIds = filteredArticleIds.map((a) => a.id);
 					if (articleIds.length === 0) return toArticlesResponse([]);
 
-					const rows = await db
-						.select({
-							article: getTableColumns(articles),
-							author: getTableColumns(users),
-							tag: getTableColumns(tags),
-						})
-						.from(articles)
-						.innerJoin(users, eq(articles.authorId, users.id))
-						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
-						.leftJoin(tags, eq(tags.id, articleTags.tagId))
-						.where(inArray(articles.id, articleIds));
+					// Step 2: Use relational API to fetch articles with nested joins
+					const articlesWithNestedData = await db.query.articles.findMany({
+						where: inArray(articles.id, articleIds),
+						with: {
+							author: true,
+							tags: {
+								with: {
+									tag: true,
+								},
+							},
+						},
+					});
 
-					// Now each article can appear in multiple rows, one for each tag
-					// We need to group them by article and then transform them to the expected shape
-					const articlesMap = new Map<
-						string,
-						Omit<InferSelectModel<typeof articles>, "authorId"> & {
-							author: InferSelectModel<typeof users>;
-							tags: string[];
-						}
-					>();
-					for (const row of rows) {
-						const articleId = row.article.id;
-						if (!articlesMap.has(articleId)) {
-							articlesMap.set(articleId, {
-								...omit(row.article, ["authorId"]),
-								author: row.author,
-								tags: [],
-							});
-						}
-						const tagName = row.tag?.name;
-						if (!tagName) continue;
-						const article = articlesMap.get(articleId);
-						if (!article) continue;
-						if (article.tags.includes(tagName)) continue;
-						article.tags.push(tagName);
-					}
+					const articlesWithData = articlesWithNestedData.map((article) => ({
+						...omit(article, ["authorId"]),
+						author: article.author,
+						tags: article.tags.map((t) => t.tag.name),
+					}));
 
-					const articlesWithData = Array.from(articlesMap.values());
 					const authorIds = articlesWithData.map((a) => a.author.id);
 
-					//  Handle extras (favorites, author following)
+					// Step 3: Load extras (favorited, favorites count, following) — batched
 					const [favoritesCounts, userFavorites, followStatus] =
 						await Promise.all([
 							db
-								.select({ articleId: favorites.articleId, count: count() })
+								.select({
+									articleId: favorites.articleId,
+									count: count().as("count"),
+								})
 								.from(favorites)
 								.where(inArray(favorites.articleId, articleIds))
 								.groupBy(favorites.articleId),
 							currentUserId
-								? db
-										.select({ articleId: favorites.articleId })
-										.from(favorites)
-										.where(
-											and(
-												eq(favorites.userId, currentUserId),
-												inArray(favorites.articleId, articleIds),
-											),
-										)
+								? db.query.favorites.findMany({
+										columns: { articleId: true },
+										where: and(
+											eq(favorites.userId, currentUserId),
+											inArray(favorites.articleId, articleIds),
+										),
+									})
 								: [],
 							currentUserId
-								? db
-										.select({ followingId: follows.followingId })
-										.from(follows)
-										.where(
-											and(
-												eq(follows.followerId, currentUserId),
-												inArray(follows.followingId, authorIds),
-											),
-										)
+								? db.query.follows.findMany({
+										columns: { followingId: true },
+										where: and(
+											eq(follows.followerId, currentUserId),
+											inArray(follows.followingId, authorIds),
+										),
+									})
 								: [],
 						]);
 
