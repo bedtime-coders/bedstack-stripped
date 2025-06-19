@@ -7,10 +7,7 @@ import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { UUID, commentsModel } from "./comments.model";
 import { comments } from "./comments.schema";
-import {
-	toCommentResponse,
-	toCommentsResponse,
-} from "./mappers/to-response.mapper";
+import { toCommentResponse, toCommentsResponse } from "./mappers";
 
 export const commentsPlugin = new Elysia({
 	tags: ["Comments"],
