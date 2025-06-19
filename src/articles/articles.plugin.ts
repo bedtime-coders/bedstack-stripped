@@ -5,8 +5,7 @@ import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
 import { users } from "@/users/users.schema";
-import { and, count, desc, eq, getTableColumns, inArray } from "drizzle-orm";
-import type { InferSelectModel, SQL } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { omit, sift } from "radashi";
@@ -305,30 +304,35 @@ export const articlesPlugin = new Elysia({
 					if (article.tagList && article.tagList.length > 0) {
 						// Create or get existing tags
 						const tagPromises = article.tagList.map(async (tagName) => {
-							const existingTag = await db.query.tags.findFirst({
-								where: eq(tags.name, tagName),
-							});
-							if (existingTag) {
-								return existingTag;
-							}
+							try {
+								const existingTag = await db.query.tags.findFirst({
+									where: eq(tags.name, tagName),
+								});
+								if (existingTag) {
+									return existingTag;
+								}
 
-							const [newTag] = await db
-								.insert(tags)
-								.values({ name: tagName })
-								.returning();
+								const [newTag] = await db
+									.insert(tags)
+									.values({ name: tagName })
+									.returning();
 
-							if (!newTag) {
-								console.error(
-									"Unexpected error: Could not create tag",
-									tagName,
-								);
+								if (!newTag) {
+									console.error(
+										"Unexpected error: Could not create tag",
+										tagName,
+									);
+									return null;
+								}
+								return newTag;
+							} catch (error) {
+								console.error(`Failed to create tag "${tagName}":`, error);
+								return null;
 							}
-							return newTag;
 						});
 
 						const createdTags = sift(await Promise.all(tagPromises));
 
-						// Associate tags with article
 						await db.insert(articleTags).values(
 							createdTags.map((tag) => ({
 								articleId: createdArticle.id,
@@ -430,27 +434,31 @@ export const articlesPlugin = new Elysia({
 						// Add new tags
 						if (article.tagList.length > 0) {
 							const tagPromises = article.tagList.map(async (tagName) => {
-								const [existingTag] = await db
-									.insert(tags)
-									.values({ name: tagName })
-									.onConflictDoNothing()
-									.returning();
+								try {
+									const existingTag = await db.query.tags.findFirst({
+										where: eq(tags.name, tagName),
+									});
+									if (existingTag) {
+										return existingTag;
+									}
 
-								if (existingTag) {
-									return existingTag;
-								}
+									const [newTag] = await db
+										.insert(tags)
+										.values({ name: tagName })
+										.returning();
 
-								const [newTag] = await db
-									.insert(tags)
-									.values({ name: tagName })
-									.returning();
-								if (!newTag) {
-									console.error(
-										"Unexpected error: Could not create tag",
-										tagName,
-									);
+									if (!newTag) {
+										console.error(
+											"Unexpected error: Could not create tag",
+											tagName,
+										);
+										return null;
+									}
+									return newTag;
+								} catch (error) {
+									console.error(`Failed to create tag "${tagName}":`, error);
+									return null;
 								}
-								return newTag;
 							});
 
 							const createdTags = sift(await Promise.all(tagPromises));
