@@ -1,13 +1,15 @@
 import {
-	articleTags,
-	articleTagsRelations,
 	articles,
 	articlesRelations,
 	favorites,
 	favoritesRelations,
+} from "@/articles/articles.schema";
+import {
 	tags,
 	tagsRelations,
-} from "@/articles/articles.schema";
+	articleTags,
+	articleTagsRelations,
+} from "@/tags/tags.schema";
 import { comments, commentsRelations } from "@/comments/comments.schema";
 import { follows } from "@/profiles/profiles.schema";
 import { users } from "@/users/users.schema";

@@ -10,7 +10,8 @@ import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { omit, sift } from "radashi";
 import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
-import { articleTags, articles, favorites, tags } from "./articles.schema";
+import { articles, favorites } from "./articles.schema";
+import { tags, articleTags } from "@/tags/tags.schema";
 import { toArticlesResponse, toResponse } from "./mappers";
 
 export const articlesPlugin = new Elysia({
