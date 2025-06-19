@@ -1,6 +1,6 @@
 import { db } from "@/core/db";
-import { tags } from "./tags.schema";
 import { Elysia } from "elysia";
+import { tags } from "./tags.schema";
 
 export const tagsPlugin = new Elysia({
 	tags: ["Tags"],

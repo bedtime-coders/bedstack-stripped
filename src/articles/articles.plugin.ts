@@ -4,6 +4,7 @@ import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
+import { articleTags, tags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
@@ -11,7 +12,6 @@ import { StatusCodes } from "http-status-codes";
 import { omit, sift } from "radashi";
 import { ArticleQuery, FeedQuery, articlesModel } from "./articles.model";
 import { articles, favorites } from "./articles.schema";
-import { tags, articleTags } from "@/tags/tags.schema";
 import { toArticlesResponse, toResponse } from "./mappers";
 
 export const articlesPlugin = new Elysia({
