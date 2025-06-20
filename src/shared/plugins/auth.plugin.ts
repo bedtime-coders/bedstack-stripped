@@ -5,6 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { name } from "../../../package.json";
 import jwt from "./jwt.plugin";
 import { token } from "./token.plugin";
+import { db } from "@/core/db";
+import { users } from "@/users/users.schema";
+import { eq } from "drizzle-orm";
 
 const JwtPayload = t.Object({
 	uid: t.String(),
@@ -55,6 +58,17 @@ export const auth = new Elysia()
 						token: ["is invalid, expired, or malformed"],
 					});
 				}
+
+				// Check user exists in DB
+				const user = await db.query.users.findFirst({
+					where: eq(users.id, jwtPayload.uid),
+				});
+				if (!user) {
+					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
+						token: ["belongs to a non-existent user"],
+					});
+				}
+
 				return { auth: { ...auth, jwtPayload } };
 			},
 		},
