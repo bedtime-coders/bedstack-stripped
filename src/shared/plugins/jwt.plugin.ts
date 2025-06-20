@@ -171,8 +171,10 @@ JWTOption<Name, Schema>) => {
 			if (!jwt) return false;
 
 			try {
-				const data = (await jwtVerify(jwt, key)).payload;
+				// biome-ignore lint/suspicious/noExplicitAny: See https://github.com/elysiajs/elysia-jwt/blob/main/src/index.ts#L177
+				const data: any = (await jwtVerify(jwt, key)).payload;
 
+				// biome-ignore lint/style/noNonNullAssertion: See https://github.com/elysiajs/elysia-jwt/blob/main/src/index.ts#L179
 				if (validator && !validator!.Check(data))
 					throw new ValidationError("JWT", validator, data);
 
