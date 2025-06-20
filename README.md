@@ -1,6 +1,17 @@
-# Bedstack (Stripped)
+<div align="center">
+<h1>
+    Bedstack (Stripped)
+</h1>
 
-⚡ Stripped version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping.
+<a href="https://github.com/bedtime-coders/bedstack-stripped/actions/workflows/tests.yml?query=branch%3Amain+event%3Apush"><img alt="Tests Status" src="https://github.com/bedtime-coders/bedstack-stripped/actions/workflows/tests.yml/badge.svg?event=push&branch=main"></a>
+   <a href="https://bun.sh/"><img src="https://img.shields.io/badge/%F0%9F%A6%8A-f6f8fa?label=bun&color=purple" alt="bun" /></a>
+   <a href="https://elysiajs.com/"><img src="https://img.shields.io/badge/%F0%9F%A6%8A-f6f8fa?label=elysia&color=purple" alt="elysia" /></a>
+   <a href="https://drizzle.team/"><img src="https://img.shields.io/badge/%F0%9F%A6%8A-f6f8fa?label=drizzle&color=purple" alt="drizzle" /></a>
+   <a href="https://biomejs.dev/"><img src="https://img.shields.io/badge/%F0%9F%A6%8A-f6f8fa?label=biome&color=purple" alt="biome" /></a>
+   <a href="https://github.com/bedtime-coders/bedstack-stripped/blob/main/LICENSE"><img src="https://img.shields.io/github/license/bedtime-coders/bedstack-stripped?label=license&color=purple" alt="license" /></a>
+   <a href="https://github.com/bedtime-coders/bedstack-stripped/stargazers/"><img src="https://img.shields.io/github/stars/bedtime-coders/bedstack-stripped" alt="star" /></a>
+   <p>⚡ Stripped version of <a href="https://github.com/bedtime-coders/bedstack">Bedstack</a> for rapid prototyping.</p>
+</div>
 
 ## Bedstack
 
