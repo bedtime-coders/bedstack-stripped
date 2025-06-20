@@ -58,6 +58,12 @@ bun test:api # Run the API tests
 bun test:unit # Run the unit tests
 ```
 
+> [!TIP]
+> To create test-specific environment configuration, create a `.env.test` file. You may use `.env.test.example` as a template:
+> ```bash
+> cp .env.test.example .env.test
+> ```
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information, including how to set up your development environment.
