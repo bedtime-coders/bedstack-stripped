@@ -19,6 +19,10 @@ Including:
 - **E**: [ElysiaJS](https://elysiajs.com) - HTTP Framework
 - **D**: [Drizzle](https://orm.drizzle.team) - ORM
 
+## How is this different from Bedstack?
+
+This is a stripped version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping, with the same core design, but simplified. See our [ARCHITECTURE.md](./ARCHITECTURE.md) for more details!
+
 ## Development
 
 1. Install dependencies
@@ -50,6 +54,12 @@ Including:
    ```bash
    bun dev
    ```
+
+6. (Optional) Start the [database studio](https://orm.drizzle.team/drizzle-studio/overview)
+   ```bash
+   bun db:studio
+   ```
+
 
 ## Testing
 

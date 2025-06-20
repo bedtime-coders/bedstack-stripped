@@ -101,7 +101,7 @@ export const articlesPlugin = new Elysia({
 
 					const authorIds = articlesWithData.map((a) => a.author.id);
 
-					// Step 3: Load extras (favorited, favorites count, following) — batched
+					// Step 3: Load extras (favorited, favorites count, following) - batched
 					const [favoritesCounts, userFavorites, followStatus] =
 						await Promise.all([
 							db
