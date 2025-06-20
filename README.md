@@ -45,6 +45,19 @@ Including:
    bun dev
    ```
 
+## Testing
+
+Run all tests:
+```bash
+bun run test # Not `bun test`!
+```
+
+Or run different test suites individually:
+```bash
+bun test:api # Run the API tests
+bun test:unit # Run the unit tests
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information, including how to set up your development environment.
