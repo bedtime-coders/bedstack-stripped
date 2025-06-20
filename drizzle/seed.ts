@@ -1,14 +1,14 @@
 import { exit } from "node:process";
 import { parseArgs } from "node:util";
+import chalk from "chalk";
+import { drizzle } from "drizzle-orm/bun-sql";
+import { reset, seed } from "drizzle-seed";
+import { draw } from "radashi";
 import * as articlesSchema from "@/articles/articles.schema";
 import { env } from "@/core/env";
 import * as profilesSchema from "@/profiles/profiles.schema";
 import * as tagsSchema from "@/tags/tags.schema";
 import * as usersSchema from "@/users/users.schema";
-import chalk from "chalk";
-import { drizzle } from "drizzle-orm/bun-sql";
-import { reset, seed } from "drizzle-seed";
-import { draw } from "radashi";
 
 const { users } = usersSchema;
 const { follows } = profilesSchema;

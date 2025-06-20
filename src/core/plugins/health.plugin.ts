@@ -1,8 +1,8 @@
-import { db } from "@/core/db";
-import { RealWorldError } from "@/shared/errors";
 import { sql } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { db } from "@/core/db";
+import { RealWorldError } from "@/shared/errors";
 
 export const health = new Elysia({
 	tags: ["Health"],

@@ -1,9 +1,9 @@
+import { Elysia } from "elysia";
 import { articlesPlugin as articles } from "@/articles/articles.plugin";
 import { commentsPlugin as comments } from "@/comments/comments.plugin";
 import { profiles } from "@/profiles/profiles.plugin";
 import { tags } from "@/tags/tags.plugin";
 import { usersPlugin as users } from "@/users/users.plugin";
-import { Elysia } from "elysia";
 import { errors, openapi } from "./plugins";
 import { health } from "./plugins/health.plugin";
 

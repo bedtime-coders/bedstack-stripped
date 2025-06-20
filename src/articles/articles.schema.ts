@@ -1,7 +1,4 @@
-import { articleTags } from "@/tags/tags.schema";
-import { users } from "@/users/users.schema";
-import { sql } from "drizzle-orm";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	index,
 	pgTable,
@@ -10,6 +7,8 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { articleTags } from "@/tags/tags.schema";
+import { users } from "@/users/users.schema";
 
 export const articles = pgTable(
 	"articles",

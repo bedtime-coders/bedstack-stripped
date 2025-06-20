@@ -1,4 +1,3 @@
-import { users } from "@/users/users.schema";
 import { sql } from "drizzle-orm";
 import {
 	check,
@@ -7,6 +6,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
+import { users } from "@/users/users.schema";
 
 export const follows = pgTable(
 	"follows",

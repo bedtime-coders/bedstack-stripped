@@ -1,19 +1,17 @@
 // Like @elysiajs/jwt, but with iat as a number (correctly, per RFC7519#section-4.1.6)
 
-import { Elysia, ValidationError, getSchemaValidator } from "elysia";
-
+import type { Static, TSchema } from "@sinclair/typebox";
+import { Type as t } from "@sinclair/typebox";
+import { Elysia, getSchemaValidator, ValidationError } from "elysia";
 import {
 	type CryptoKey,
 	type JWK,
 	type JWSHeaderParameters,
 	type JWTPayload,
+	jwtVerify,
 	type KeyObject,
 	SignJWT,
-	jwtVerify,
 } from "jose";
-
-import { Type as t } from "@sinclair/typebox";
-import type { Static, TSchema } from "@sinclair/typebox";
 
 type UnwrapSchema<
 	Schema extends TSchema | undefined,

@@ -1,10 +1,10 @@
+import { eq } from "drizzle-orm";
+import { Elysia, type ElysiaConfig, t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/db";
 import { env } from "@/core/env";
 import { RealWorldError } from "@/shared/errors";
 import { users } from "@/users/users.schema";
-import { eq } from "drizzle-orm";
-import { Elysia, type ElysiaConfig, t } from "elysia";
-import { StatusCodes } from "http-status-codes";
 import { name } from "../../../package.json";
 import jwt from "./jwt.plugin";
 import { token } from "./token.plugin";

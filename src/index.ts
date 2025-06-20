@@ -1,6 +1,6 @@
+import chalk from "chalk";
 import { app } from "@/core/app";
 import { env } from "@/core/env";
-import chalk from "chalk";
 
 console.info(chalk.gray("Starting Bedstack"));
 

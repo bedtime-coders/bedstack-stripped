@@ -1,5 +1,5 @@
-import type { users } from "@/users/users.schema";
 import type { InferSelectModel } from "drizzle-orm";
+import type { users } from "@/users/users.schema";
 import type { articles } from "../articles.schema";
 
 export type ArticlesWithData = Array<

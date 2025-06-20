@@ -1,8 +1,8 @@
+import { and, count, eq, type InferSelectModel } from "drizzle-orm";
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
 import type { tags } from "@/tags/tags.schema";
 import type { users } from "@/users/users.schema";
-import { type InferSelectModel, and, count, eq } from "drizzle-orm";
 import { type articles, favorites } from "../articles.schema";
 
 /**

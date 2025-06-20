@@ -1,5 +1,5 @@
-import { env } from "@/core/env";
 import { defineConfig } from "drizzle-kit";
+import { env } from "@/core/env";
 
 export default defineConfig({
 	out: "./drizzle",

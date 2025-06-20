@@ -1,9 +1,9 @@
-import { db } from "@/core/db";
-import { RealWorldError, assertNoConflicts } from "@/shared/errors";
-import { auth } from "@/shared/plugins";
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
+import { db } from "@/core/db";
+import { assertNoConflicts, RealWorldError } from "@/shared/errors";
+import { auth } from "@/shared/plugins";
 import { toResponse } from "./mappers";
 import { usersModel } from "./users.model";
 import { users } from "./users.schema";

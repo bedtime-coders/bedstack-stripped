@@ -1,10 +1,10 @@
+import { and, eq } from "drizzle-orm";
+import { Elysia, NotFoundError, t } from "elysia";
+import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/db";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { users } from "@/users/users.schema";
-import { and, eq } from "drizzle-orm";
-import { Elysia, NotFoundError, t } from "elysia";
-import { StatusCodes } from "http-status-codes";
 import { toResponse } from "./mappers";
 import { profilesModel } from "./profiles.model";
 import { follows } from "./profiles.schema";

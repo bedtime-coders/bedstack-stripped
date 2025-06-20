@@ -1,3 +1,4 @@
+import { drizzle } from "drizzle-orm/bun-sql";
 import {
 	articles,
 	articlesRelations,
@@ -13,7 +14,6 @@ import {
 	tagsRelations,
 } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
-import { drizzle } from "drizzle-orm/bun-sql";
 import { env } from "./env";
 
 export const db = drizzle(env.DATABASE_URL, {

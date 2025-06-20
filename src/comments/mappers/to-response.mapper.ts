@@ -1,7 +1,7 @@
+import { and, eq, type InferSelectModel, inArray } from "drizzle-orm";
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
 import type { users } from "@/users/users.schema";
-import { type InferSelectModel, and, eq, inArray } from "drizzle-orm";
 import type { comments } from "../comments.schema";
 
 /**
