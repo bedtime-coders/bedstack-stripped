@@ -13,10 +13,10 @@ import { draw } from "radashi";
 const { users } = usersSchema;
 const { follows } = profilesSchema;
 const schema = {
-	usersSchema,
-	profilesSchema,
-	tagsSchema,
-	articlesSchema,
+	...usersSchema,
+	...profilesSchema,
+	...tagsSchema,
+	...articlesSchema,
 };
 
 // See: https://github.com/drizzle-team/drizzle-orm/issues/3599

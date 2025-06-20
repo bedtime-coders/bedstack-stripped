@@ -8,10 +8,10 @@ import { drizzle } from "drizzle-orm/bun-sql";
 import { reset } from "drizzle-seed";
 
 const schema = {
-	usersSchema,
-	profilesSchema,
-	tagsSchema,
-	articlesSchema,
+	...usersSchema,
+	...profilesSchema,
+	...tagsSchema,
+	...articlesSchema,
 };
 
 console.log(chalk.gray("Resetting database"));
