@@ -11,7 +11,7 @@
   <a href="https://scalar.com/"><img src="https://img.shields.io/badge/Scalar-080808?logo=scalar&logoColor=e7e7e7" alt="scalar" /></a>
   <a href="https://github.com/bedtime-coders/bedstack-stripped/blob/main/LICENSE"><img src="https://custom-icon-badges.demolab.com/github/license/bedtime-coders/bedstack-stripped?label=License&color=blue&logo=law" alt="license" /></a>
   <a href="https://github.com/bedtime-coders/bedstack-stripped/stargazers/"><img src="https://custom-icon-badges.demolab.com/github/stars/bedtime-coders/bedstack-stripped?logo=star&logoColor=373737&label=Star" alt="star" /></a>
-  <p>⚡ Stripped version of <a href="https://github.com/bedtime-coders/bedstack">Bedstack</a> for rapid prototyping.</p>
+  <p>⚡ Stripped version of <a href="https://github.com/bedtime-coders/bedstack">Bedstack</a> for rapid prototyping</p>
 </div>
 
 ## Bedstack
