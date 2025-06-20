@@ -21,7 +21,7 @@ export const follows = pgTable(
 		updatedAt: timestamp("updated_at")
 			.notNull()
 			.defaultNow()
-			.$onUpdate(() => sql`now()`),
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [
 		primaryKey({ columns: [table.followerId, table.followingId] }),

@@ -37,9 +37,12 @@ export const errors = (app: Elysia) =>
 		const reason = isElysiaError(error)
 			? error.response
 			: DEFAULT_ERROR_MESSAGE;
+
+		console.error(error);
+
 		return {
 			errors: {
-				[code]: [reason],
+				[code.toString().toLowerCase()]: [reason],
 			},
 		};
 	});

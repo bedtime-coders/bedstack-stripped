@@ -19,7 +19,7 @@ export const comments = pgTable(
 		updatedAt: timestamp("updated_at")
 			.notNull()
 			.defaultNow()
-			.$onUpdate(() => sql`now()`),
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [
 		index("comments_article_id_idx").on(table.articleId),

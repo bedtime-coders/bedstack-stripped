@@ -38,12 +38,12 @@ if (values.reset) {
 		);
 		exit(1);
 	}
-	console.log(chalk.gray("Resetting database"));
+	console.info(chalk.gray("Resetting database"));
 	await reset(db, schema);
-	console.log(`[${chalk.green("✓")}] Database reset complete`);
+	console.info(`[${chalk.green("✓")}] Database reset complete`);
 }
 
-console.log(chalk.gray("Seeding database"));
+console.info(chalk.gray("Seeding database"));
 
 // Auto seeding
 
@@ -95,6 +95,6 @@ if (followRows.length > 0) {
 	await db.insert(follows).values(followRows);
 }
 
-console.log(`[${chalk.green("✓")}] Database seeded`);
+console.info(`[${chalk.green("✓")}] Database seeded`);
 
 exit(0);

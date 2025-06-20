@@ -26,7 +26,7 @@ export const articles = pgTable(
 		updatedAt: timestamp("updated_at")
 			.notNull()
 			.defaultNow()
-			.$onUpdate(() => sql`now()`),
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [
 		index("articles_slug_idx").on(table.slug),

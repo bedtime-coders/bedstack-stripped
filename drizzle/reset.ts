@@ -14,7 +14,7 @@ const schema = {
 	...articlesSchema,
 };
 
-console.log(chalk.gray("Resetting database"));
+console.info(chalk.gray("Resetting database"));
 // See: https://github.com/drizzle-team/drizzle-orm/issues/3599
 await reset(drizzle(env.DATABASE_URL), schema);
-console.log(`[${chalk.green("✓")}] Database reset complete`);
+console.info(`[${chalk.green("✓")}] Database reset complete`);

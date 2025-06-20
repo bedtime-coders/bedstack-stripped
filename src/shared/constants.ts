@@ -1,7 +1,7 @@
 /**
  * Default error message
  */
-export const DEFAULT_ERROR_MESSAGE = "An error occurred";
+export const DEFAULT_ERROR_MESSAGE = "an error occurred";
 
 /**
  * Default limit for pagination (number of items per request)

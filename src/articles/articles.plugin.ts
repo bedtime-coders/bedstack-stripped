@@ -388,19 +388,10 @@ export const articlesPlugin = new Elysia({
 					body: { article },
 					auth: { jwtPayload },
 				}) => {
-					console.log("[UPDATE ARTICLE] slug:", slug);
-					console.log("[UPDATE ARTICLE] incoming article:", article);
-					console.log("[UPDATE ARTICLE] user id:", jwtPayload.uid);
-
 					// Check article exists and user owns it
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 					});
-
-					console.log(
-						"[UPDATE ARTICLE] found existing article:",
-						existingArticle,
-					);
 
 					if (!existingArticle) {
 						throw new NotFoundError("article");
@@ -419,6 +410,7 @@ export const articlesPlugin = new Elysia({
 					}
 
 					// Update article
+
 					const [updatedArticle] = await db
 						.update(articles)
 						.set({
@@ -427,8 +419,6 @@ export const articlesPlugin = new Elysia({
 						})
 						.where(eq(articles.id, existingArticle.id))
 						.returning();
-
-					console.log("[UPDATE ARTICLE] updated article:", updatedArticle);
 
 					if (!updatedArticle) {
 						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
@@ -497,15 +487,11 @@ export const articlesPlugin = new Elysia({
 						},
 					});
 
-					console.log("[UPDATE ARTICLE] articleWithData:", articleWithData);
-
 					if (!articleWithData) {
 						throw new NotFoundError("article");
 					}
 
-					const response = await toResponse(articleWithData, jwtPayload.uid);
-					console.log("[UPDATE ARTICLE] response:", response);
-					return response;
+					return toResponse(articleWithData, jwtPayload.uid);
 				},
 				{
 					detail: {

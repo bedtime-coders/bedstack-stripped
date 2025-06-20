@@ -13,7 +13,7 @@ const POSTMAN_COLLECTION =
 	env.POSTMAN_COLLECTION ||
 	"https://raw.githubusercontent.com/gothinkster/realworld/refs/heads/main/api/Conduit.postman_collection.json";
 
-console.log(chalk.gray("Checking Bedstack health"));
+console.info(chalk.gray("Checking Bedstack health"));
 
 // first query the api to see if it's running
 try {
@@ -34,7 +34,7 @@ try {
 	process.exit(1);
 }
 
-console.log(chalk.gray("Resetting database"));
+console.info(chalk.gray("Resetting database"));
 
 try {
 	await $`bun run db:reset`.quiet();
@@ -46,7 +46,7 @@ try {
 	process.exit(1);
 }
 
-console.log(chalk.gray("Running API tests"));
+console.info(chalk.gray("Running API tests"));
 
 newman.run(
 	{
@@ -67,6 +67,6 @@ newman.run(
 			console.error(err);
 			process.exit(1);
 		}
-		console.log(`[${chalk.green("✓")}] API tests complete`);
+		console.info(`[${chalk.green("✓")}] API tests complete`);
 	},
 );
