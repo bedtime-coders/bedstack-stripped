@@ -37,8 +37,7 @@ export async function toArticlesResponse(
 		articlesCount: articlesWithData.length,
 		articles: articlesWithData.map((article) => {
 			const favoritesCount =
-				extras.favoritesCounts.find((fc) => fc.articleId === article.id)
-					?.count || 0;
+				favoritesCounts.find((fc) => fc.articleId === article.id)?.count ?? 0;
 			const isFavorited = userFavorites.some(
 				(fav) => fav.articleId === article.id,
 			);
