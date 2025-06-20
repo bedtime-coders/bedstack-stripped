@@ -29,7 +29,7 @@ try {
 			"Bedstack is not running, run the following command to start it:",
 		),
 	);
-	console.error(chalk.gray("bun run db:start"));
+	console.info(chalk.cyan("bun dev"));
 	process.exit(1);
 }
 
