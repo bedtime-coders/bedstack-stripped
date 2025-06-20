@@ -1,29 +1,23 @@
-<div align="center">
-  <img src="./public/logo-mini.png" alt="bedstack-stripped" width="200"/>
-  <h1>
-      Bedstack (Stripped)
-  </h1>
-  <a href="https://github.com/bedtime-coders/bedstack-stripped/actions/workflows/tests.yml?query=branch%3Amain+event%3Apush"><img alt="Tests Status" src="https://github.com/bedtime-coders/bedstack-stripped/actions/workflows/tests.yml/badge.svg?event=push&branch=main&"></a>
-  <a href="https://bun.sh/"><img src="https://img.shields.io/badge/Bun-14151a?logo=bun&logoColor=fbf0df" alt="bun" /></a>
-  <a href="https://elysiajs.com/"><img src="https://custom-icon-badges.demolab.com/badge/ElysiaJS-0f172b.svg?logo=elysia" alt="elysia" /></a>
-  <a href="https://drizzle.team/"><img src="https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=000" alt="drizzle" /></a>
-  <a href="https://biomejs.dev/"><img src="https://img.shields.io/badge/Biome-24272f?logo=biome&logoColor=f6f6f9" alt="biome" /></a>
-  <a href="https://scalar.com/"><img src="https://img.shields.io/badge/Scalar-080808?logo=scalar&logoColor=e7e7e7" alt="scalar" /></a>
-  <a href="https://github.com/bedtime-coders/bedstack-stripped/blob/main/LICENSE"><img src="https://custom-icon-badges.demolab.com/github/license/bedtime-coders/bedstack-stripped?label=License&color=blue&logo=law" alt="license" /></a>
-  <a href="https://github.com/bedtime-coders/bedstack-stripped/stargazers/"><img src="https://custom-icon-badges.demolab.com/github/stars/bedtime-coders/bedstack-stripped?logo=star&logoColor=373737&label=Star" alt="star" /></a>
-  <p>⚡ Stripped version of <a href="https://github.com/bedtime-coders/bedstack">Bedstack</a> for rapid prototyping.</p>
+<div align='center'>
+
+<img src="public/logo-mini.png" alt="Logo for Bedstack RealWorld example" width=200>
+<h1>Bedstack (Stripped)</h1>
+
+[![Tests Status](https://github.com/bedtime-coders/bedstack-stripped/actions/workflows/tests.yml/badge.svg?event=push&branch=main&)](https://github.com/bedtime-coders/bedstac/actions/workflows/tests.yml?query=branch%3Amain+event%3Apush) [![Discord](https://img.shields.io/discord/1164270344115335320?label=Chat&color=5865f4&logo=discord&labelColor=121214)](https://discord.gg/8UcP9QB5AV) [![License](https://custom-icon-badges.demolab.com/github/license/bedtime-coders/bedstack?label=License&color=blue&logo=law&labelColor=0d1117)](https://github.com/bedtime-coders/bedstack-stripped/blob/main/LICENSE) [![Bun](https://img.shields.io/badge/Bun-14151a?logo=bun&logoColor=fbf0df)](https://bun.sh/) [![ElysiaJS](https://custom-icon-badges.demolab.com/badge/ElysiaJS-0f172b.svg?logo=elysia)](https://elysiajs.com/) [![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=000)](https://drizzle.team/) [![Biome](https://img.shields.io/badge/Biome-24272f?logo=biome&logoColor=f6f6f9)](https://biomejs.dev/) [![Scalar](https://img.shields.io/badge/Scalar-080808?logo=scalar&logoColor=e7e7e7)](https://scalar.com/) [![Star](https://custom-icon-badges.demolab.com/github/stars/bedtime-coders/bedstack?logo=star&logoColor=373737&label=Star)](https://github.com/bedtime-coders/bedstack-stripped/stargazers/)
+
+⚡ Stripped version of [Bedstack](https://github.com/bedtime-coders/bedstack) for rapid prototyping
+
 </div>
 
-## Bedstack
+## Bedstack: Bun + ElysiaJS + Drizzle Stack
 
-Bedstack is a collection of bleeding-edge technologies to build modern web applications.
+**Bedstack** is a collection of bleeding-edge technologies to build modern web applications.
 
 Including:
 
-- [Bun](https://bun.sh) - Runtime, package manager
-- [ElysiaJS](https://elysiajs.com) - HTTP Framework
-- [Drizzle](https://orm.drizzle.team) - ORM, Migrations, Seeding
-- [Biome](https://biomejs.dev) - Linter, Formatter
+- **B**: [Bun](https://bun.sh) - Runtime + package manager, [Biome](https://biomejs.dev) - Code quality
+- **E**: [ElysiaJS](https://elysiajs.com) - HTTP Framework
+- **D**: [Drizzle](https://orm.drizzle.team) - ORM
 
 ## Development
 
