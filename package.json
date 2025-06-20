@@ -40,7 +40,7 @@
 		"radashi": "^12.5.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "2.0.0",
 		"@types/bun": "^1.2.15",
 		"@types/newman": "^5.3.6",
 		"drizzle-kit": "^0.31.1",
