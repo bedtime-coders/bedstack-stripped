@@ -49,7 +49,7 @@ export async function toArticlesResponse(
 				slug: article.slug,
 				title: article.title,
 				description: article.description,
-				tagList: article.tags,
+				tagList: article.tags.sort((a, b) => a.localeCompare(b)),
 				createdAt: article.createdAt.toISOString(),
 				updatedAt: article.updatedAt.toISOString(),
 				favorited: isFavorited,

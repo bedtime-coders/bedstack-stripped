@@ -1,8 +1,9 @@
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
+import type { tags } from "@/tags/tags.schema";
 import type { users } from "@/users/users.schema";
 import { type InferSelectModel, and, count, eq } from "drizzle-orm";
-import { type articles, favorites, type tags } from "../articles.schema";
+import { type articles, favorites } from "../articles.schema";
 
 /**
  * Map an article to a response
@@ -76,7 +77,9 @@ export async function toResponse(
 			title: article.title,
 			description: article.description,
 			body: article.body,
-			tagList: article.tags.map(({ tag }) => tag.name),
+			tagList: article.tags
+				.map(({ tag }) => tag.name)
+				.sort((a, b) => a.localeCompare(b)),
 			createdAt: article.createdAt.toISOString(),
 			updatedAt: article.updatedAt.toISOString(),
 			favorited,
