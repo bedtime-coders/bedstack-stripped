@@ -1,4 +1,3 @@
-import { exec } from "node:child_process";
 import { $ } from "bun";
 import chalk from "chalk";
 import newman from "newman";
@@ -24,7 +23,7 @@ try {
 		);
 		process.exit(1);
 	}
-} catch (error) {
+} catch {
 	console.error(
 		chalk.red(
 			"Bedstack is not running, run the following command to start it:",

@@ -47,7 +47,7 @@ console.info(chalk.gray("Seeding database"));
 
 // Auto seeding
 
-await seed(db, schema).refine((f) => ({
+await seed(db, schema).refine(() => ({
 	users: {
 		count: 10,
 	},

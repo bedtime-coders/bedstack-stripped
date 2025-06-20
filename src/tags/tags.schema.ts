@@ -1,12 +1,5 @@
-import { relations, sql } from "drizzle-orm";
-import {
-	index,
-	pgTable,
-	primaryKey,
-	text,
-	timestamp,
-	uuid,
-} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { index, pgTable, primaryKey, text, uuid } from "drizzle-orm/pg-core";
 import { articles } from "@/articles/articles.schema";
 
 export const tags = pgTable(

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { Elysia, type ElysiaConfig, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/db";
 import { env } from "@/core/env";
