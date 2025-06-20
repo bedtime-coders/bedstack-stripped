@@ -4,7 +4,6 @@
 	"description": "⚡ Stripped version of Bedstack for rapid prototyping",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "bun run --watch src/index.ts",
 		"build": "bun build src/index.ts --outdir dist --target=bun --sourcemap",
 		"preview": "bun run dist/index.js",
@@ -13,6 +12,7 @@
 		"check:errors": "biome check --diagnostic-level=error",
 		"typecheck": "tsc --noEmit",
 		"clean": "rimraf node_modules bun.lockb dist",
+		"test": "bun run tests/run-api-tests.ts",
 		"db": "docker compose up",
 		"db:start": "docker compose up -d",
 		"db:stop": "docker compose stop",
@@ -40,8 +40,10 @@
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/bun": "^1.2.15",
+		"@types/newman": "^5.3.6",
 		"drizzle-kit": "^0.31.1",
 		"drizzle-seed": "^0.3.1",
+		"newman": "^6.2.1",
 		"pg": "^8.16.1",
 		"typescript": "^5.8.3"
 	},

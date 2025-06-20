@@ -1,7 +1,7 @@
 import { db } from "@/core/db";
 import { Elysia, t } from "elysia";
 
-export const tagsPlugin = new Elysia({
+export const tags = new Elysia({
 	tags: ["Tags"],
 }).get(
 	"/tags",

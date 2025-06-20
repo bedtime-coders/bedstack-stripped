@@ -9,7 +9,7 @@ import { usersModel } from "./users.model";
 import { users } from "./users.schema";
 
 export const usersPlugin = new Elysia({
-	tags: ["Users"],
+	tags: ["Auth"],
 })
 	.use(auth)
 	.use(usersModel)
@@ -123,16 +123,25 @@ export const usersPlugin = new Elysia({
 							return Boolean(existing && existing.id !== jwtPayload.uid);
 						},
 					);
-					const [updatedUser] = await db
-						.update(users)
-						.set({
-							...user,
-							password: user?.password
-								? await Bun.password.hash(user.password)
-								: undefined,
-						})
-						.where(eq(users.id, jwtPayload.uid))
-						.returning();
+					let updatedUser: typeof users.$inferSelect | undefined;
+					try {
+						[updatedUser] = await db
+							.update(users)
+							.set({
+								...user,
+								password: user?.password
+									? await Bun.password.hash(user.password)
+									: undefined,
+							})
+							.where(eq(users.id, jwtPayload.uid))
+							.returning();
+					} catch (error) {
+						console.error(error);
+						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
+							user: ["failed to update"],
+						});
+					}
+
 					if (!updatedUser) {
 						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
 							user: ["failed to update"],
