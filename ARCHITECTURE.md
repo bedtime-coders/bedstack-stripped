@@ -46,7 +46,7 @@ Database tables and relations using [Drizzle ORM](https://orm.drizzle.team).
 
 ### 🧾 `entities.model.ts`
 
-[DTOs](https://elysiajs.com/essential/best-practice.html#model) defined with [Elysia.t](https://elysiajs.com/essential/validation) (a thin wrapper around [TypeBox](https://typebox.io)), with types inferred automatically.
+[DTOs](https://elysiajs.com/essential/best-practice.html#model) defined with [Elysia.t](https://elysiajs.com/essential/validation) (a thin wrapper around [TypeBox](https://github.com/sinclairzx81/typebox)), with types inferred automatically.
 
 Example: 
 
