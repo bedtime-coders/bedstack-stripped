@@ -8,7 +8,7 @@ Each feature is self-contained and designed for clarity, fast development, and m
 
 ## Design Philosophy
 
-- Keep the structure familiar by following the same _horizontal layout_ as bedstack (one folder per domain feature).
+- Keep the structure familiar by following the same _horizontal layout_ as Bedstack (one folder per domain feature).
 
 - Collapse _vertical layers_ by combining controller, service, and repository logic in a single plugin file.
 
