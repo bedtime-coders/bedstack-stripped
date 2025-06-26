@@ -9,7 +9,7 @@ import { comments, commentsRelations } from "@/comments/comments.schema";
 import { follows } from "@/profiles/profiles.schema";
 import {
 	articlesToTags,
-	articleToTagsRelations,
+	articlesToTagsRelations,
 	tags,
 	tagsRelations,
 } from "@/tags/tags.schema";
@@ -27,7 +27,7 @@ export const db = drizzle(env.DATABASE_URL, {
 		comments,
 		articlesRelations,
 		tagsRelations,
-		articleToTagsRelations,
+		articlesToTagsRelations,
 		favoritesRelations,
 		commentsRelations,
 	},

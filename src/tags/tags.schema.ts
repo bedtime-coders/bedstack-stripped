@@ -32,7 +32,7 @@ export const articlesToTags = pgTable(
 	],
 );
 
-export const articleToTagsRelations = relations(articlesToTags, ({ one }) => ({
+export const articlesToTagsRelations = relations(articlesToTags, ({ one }) => ({
 	article: one(articles, {
 		fields: [articlesToTags.articleId],
 		references: [articles.id],
