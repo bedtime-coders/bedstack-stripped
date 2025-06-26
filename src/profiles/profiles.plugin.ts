@@ -30,17 +30,16 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 							where: eq(users.username, username),
 						});
 						if (!user) throw new NotFoundError("profile");
-
-						let following = false;
-						if (currentUserId) {
-							const follow = await db.query.follows.findFirst({
-								where: and(
-									eq(follows.followerId, currentUserId),
-									eq(follows.followingId, user.id),
-								),
-							});
-							following = Boolean(follow);
-						}
+						const following = currentUserId
+							? Boolean(
+									await db.query.follows.findFirst({
+										where: and(
+											eq(follows.followerId, currentUserId),
+											eq(follows.followingId, user.id),
+										),
+									}),
+								)
+							: false;
 						return toResponse(user, following);
 					},
 					{
