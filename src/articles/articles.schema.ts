@@ -34,6 +34,15 @@ export const articles = pgTable(
 	],
 );
 
+export const articlesRelations = relations(articles, ({ one, many }) => ({
+	author: one(users, {
+		fields: [articles.authorId],
+		references: [users.id],
+	}),
+	tags: many(articlesToTags),
+	favorites: many(favorites),
+}));
+
 export const favorites = pgTable(
 	"favorites",
 	{
@@ -51,15 +60,6 @@ export const favorites = pgTable(
 		index("favorites_article_id_idx").on(table.articleId),
 	],
 );
-
-export const articlesRelations = relations(articles, ({ one, many }) => ({
-	author: one(users, {
-		fields: [articles.authorId],
-		references: [users.id],
-	}),
-	tags: many(articlesToTags),
-	favorites: many(favorites),
-}));
 
 export const favoritesRelations = relations(favorites, ({ one }) => ({
 	user: one(users, {

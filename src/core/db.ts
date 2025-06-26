@@ -13,7 +13,7 @@ import {
 	tags,
 	tagsRelations,
 } from "@/tags/tags.schema";
-import { users } from "@/users/users.schema";
+import { users, usersRelations } from "@/users/users.schema";
 import { env } from "./env";
 
 export const db = drizzle(env.DATABASE_URL, {
@@ -31,6 +31,7 @@ export const db = drizzle(env.DATABASE_URL, {
 		favoritesRelations,
 		commentsRelations,
 		followsRelations,
+		usersRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });

@@ -1,4 +1,8 @@
+import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { articles } from "@/articles/articles.schema";
+import { comments } from "@/comments/comments.schema";
+import { follows } from "@/profiles/profiles.schema";
 
 export const users = pgTable("users", {
 	id: uuid("id").primaryKey().defaultRandom(),
@@ -13,3 +17,10 @@ export const users = pgTable("users", {
 		.defaultNow()
 		.$onUpdate(() => new Date()),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+	followers: many(follows),
+	following: many(follows),
+	comments: many(comments),
+	articles: many(articles),
+}));
