@@ -14,9 +14,7 @@ import { ArticleQuery, articlesModel, FeedQuery } from "./articles.model";
 import { articles, favorites } from "./articles.schema";
 import { toArticlesResponse, toResponse } from "./mappers";
 
-export const articlesPlugin = new Elysia({
-	tags: ["Articles"],
-})
+export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 	.use(auth)
 	.use(articlesModel)
 	.group("/articles", (app) =>

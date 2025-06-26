@@ -9,9 +9,7 @@ import { commentsModel, UUID } from "./comments.model";
 import { comments } from "./comments.schema";
 import { toCommentResponse, toCommentsResponse } from "./mappers";
 
-export const commentsPlugin = new Elysia({
-	tags: ["Comments"],
-})
+export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 	.use(auth)
 	.use(commentsModel)
 	.group("/articles/:slug/comments", (app) =>

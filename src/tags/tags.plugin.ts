@@ -1,9 +1,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "@/core/db";
 
-export const tags = new Elysia({
-	tags: ["Tags"],
-}).get(
+export const tags = new Elysia({ tags: ["Tags"] }).get(
 	"/tags",
 	async () => {
 		const allTags = await db.query.tags.findMany();
