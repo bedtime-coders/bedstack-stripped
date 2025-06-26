@@ -18,7 +18,7 @@ export async function toResponse(
 			tag: InferSelectModel<typeof tags>;
 		}>;
 	},
-	currentUserId?: string,
+	currentUserId?: string | null,
 ): Promise<{
 	article: {
 		slug: string;

@@ -15,7 +15,7 @@ export async function toCommentResponse(
 	comment: InferSelectModel<typeof comments> & {
 		author: InferSelectModel<typeof users>;
 	},
-	currentUserId?: string,
+	currentUserId?: string | null,
 	followingStatus?: boolean,
 ): Promise<{
 	comment: {
@@ -84,7 +84,7 @@ export async function toCommentsResponse(
 			author: InferSelectModel<typeof users>;
 		}
 	>,
-	currentUserId?: string,
+	currentUserId?: string | null,
 ): Promise<{
 	comments: Array<{
 		id: string;
