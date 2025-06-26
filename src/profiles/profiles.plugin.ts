@@ -25,17 +25,17 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 			app
 				.get(
 					"/:username",
-					async ({ params: { username }, auth: { jwtPayload } }) => {
+					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
 						if (!user) throw new NotFoundError("profile");
 
 						let following = false;
-						if (jwtPayload) {
+						if (currentUserId) {
 							const follow = await db.query.follows.findFirst({
 								where: and(
-									eq(follows.followerId, jwtPayload.uid),
+									eq(follows.followerId, currentUserId),
 									eq(follows.followingId, user.id),
 								),
 							});
@@ -61,12 +61,12 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 				})
 				.post(
 					"/:username/follow",
-					async ({ params: { username }, auth: { jwtPayload } }) => {
+					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
 						if (!user) throw new NotFoundError("profile");
-						if (user.id === jwtPayload.uid) {
+						if (user.id === currentUserId) {
 							throw new RealWorldError(StatusCodes.UNPROCESSABLE_ENTITY, {
 								profile: ["cannot be followed by yourself"],
 							});
@@ -74,7 +74,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 						await db
 							.insert(follows)
 							.values({
-								followerId: jwtPayload.uid,
+								followerId: currentUserId,
 								followingId: user.id,
 							})
 							.onConflictDoNothing();
@@ -91,12 +91,12 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 				)
 				.delete(
 					"/:username/follow",
-					async ({ params: { username }, auth: { jwtPayload } }) => {
+					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
 							where: eq(users.username, username),
 						});
 						if (!user) throw new NotFoundError("profile");
-						if (user.id === jwtPayload.uid) {
+						if (user.id === currentUserId) {
 							throw new RealWorldError(StatusCodes.UNPROCESSABLE_ENTITY, {
 								profile: ["cannot be unfollowed by yourself"],
 							});
@@ -105,7 +105,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 							.delete(follows)
 							.where(
 								and(
-									eq(follows.followerId, jwtPayload.uid),
+									eq(follows.followerId, currentUserId),
 									eq(follows.followingId, user.id),
 								),
 							);

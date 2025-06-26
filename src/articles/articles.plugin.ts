@@ -29,10 +29,8 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						limit = DEFAULT_LIMIT,
 						offset = DEFAULT_OFFSET,
 					},
-					auth: { jwtPayload },
+					auth: { currentUserId },
 				}) => {
-					const currentUserId = jwtPayload?.uid;
-
 					// Preload filter IDs using relational API
 					const [authorUser, favoritedUser] = await Promise.all([
 						authorUsername
@@ -148,7 +146,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			)
 			.get(
 				"/:slug",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
+				async ({ params: { slug }, auth: { currentUserId } }) => {
 					const articleWithData = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 						with: {
@@ -165,7 +163,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(articleWithData, jwtPayload?.uid);
+					return toResponse(articleWithData, currentUserId);
 				},
 				{
 					detail: {
@@ -187,10 +185,8 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				"/feed",
 				async ({
 					query: { limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET },
-					auth: { jwtPayload },
+					auth: { currentUserId },
 				}) => {
-					const currentUserId = jwtPayload.uid;
-
 					// Step 1: Get followed user IDs
 					const followed = await db
 						.select({ followingId: follows.followingId })
@@ -278,7 +274,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			)
 			.post(
 				"/",
-				async ({ body: { article }, auth: { jwtPayload } }) => {
+				async ({ body: { article }, auth: { currentUserId } }) => {
 					const slug = slugify(article.title);
 
 					// Create article
@@ -289,7 +285,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							title: article.title,
 							description: article.description,
 							body: article.body,
-							authorId: jwtPayload.uid,
+							authorId: currentUserId,
 						})
 						.returning();
 
@@ -367,7 +363,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							...articleWithData,
 							tags: articleWithData.tags,
 						},
-						jwtPayload.uid,
+						currentUserId,
 					);
 				},
 				{
@@ -384,7 +380,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				async ({
 					params: { slug },
 					body: { article },
-					auth: { jwtPayload },
+					auth: { currentUserId },
 				}) => {
 					// Check article exists and user owns it
 					const existingArticle = await db.query.articles.findFirst({
@@ -395,7 +391,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					if (existingArticle.authorId !== jwtPayload.uid) {
+					if (existingArticle.authorId !== currentUserId) {
 						throw new RealWorldError(StatusCodes.FORBIDDEN, {
 							article: ["you can only update your own articles"],
 						});
@@ -489,7 +485,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(articleWithData, jwtPayload.uid);
+					return toResponse(articleWithData, currentUserId);
 				},
 				{
 					detail: {
@@ -503,7 +499,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			)
 			.delete(
 				"/:slug",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
+				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Check article exists and user owns it
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -513,7 +509,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					if (existingArticle.authorId !== jwtPayload.uid) {
+					if (existingArticle.authorId !== currentUserId) {
 						throw new RealWorldError(StatusCodes.FORBIDDEN, {
 							article: ["you can only delete your own articles"],
 						});
@@ -539,7 +535,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			})
 			.post(
 				"/:slug/favorite",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
+				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Verify article exists
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -552,7 +548,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					// Check if already favorited
 					const existingFavorite = await db.query.favorites.findFirst({
 						where: and(
-							eq(favorites.userId, jwtPayload.uid),
+							eq(favorites.userId, currentUserId),
 							eq(favorites.articleId, existingArticle.id),
 						),
 					});
@@ -575,12 +571,12 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							throw new NotFoundError("article");
 						}
 
-						return toResponse(articleWithData, jwtPayload.uid);
+						return toResponse(articleWithData, currentUserId);
 					}
 
 					// Add to favorites
 					await db.insert(favorites).values({
-						userId: jwtPayload.uid,
+						userId: currentUserId,
 						articleId: existingArticle.id,
 					});
 
@@ -601,7 +597,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(articleWithData, jwtPayload.uid);
+					return toResponse(articleWithData, currentUserId);
 				},
 				{
 					detail: {
@@ -613,7 +609,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			)
 			.delete(
 				"/:slug/favorite",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
+				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Verify article exists
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -628,7 +624,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						.delete(favorites)
 						.where(
 							and(
-								eq(favorites.userId, jwtPayload.uid),
+								eq(favorites.userId, currentUserId),
 								eq(favorites.articleId, existingArticle.id),
 							),
 						);
@@ -650,7 +646,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(articleWithData, jwtPayload.uid);
+					return toResponse(articleWithData, currentUserId);
 				},
 				{
 					detail: {

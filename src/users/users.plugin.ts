@@ -85,9 +85,9 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 		app
 			.get(
 				"/",
-				async ({ auth: { sign, jwtPayload } }) => {
+				async ({ auth: { sign, currentUserId } }) => {
 					const user = await db.query.users.findFirst({
-						where: eq(users.id, jwtPayload.uid),
+						where: eq(users.id, currentUserId),
 					});
 					if (!user) {
 						throw new NotFoundError("user");
@@ -107,7 +107,7 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 			)
 			.put(
 				"/",
-				async ({ body: { user }, auth: { sign, jwtPayload } }) => {
+				async ({ body: { user }, auth: { sign, currentUserId } }) => {
 					await assertNoConflicts(
 						"user",
 						{
@@ -118,7 +118,7 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 							const existing = await db.query.users.findFirst({
 								where: eq(users[key], value),
 							});
-							return Boolean(existing && existing.id !== jwtPayload.uid);
+							return Boolean(existing && existing.id !== currentUserId);
 						},
 					);
 					const [updatedUser] = await db
@@ -129,7 +129,7 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 								? await Bun.password.hash(user.password)
 								: undefined,
 						})
-						.where(eq(users.id, jwtPayload.uid))
+						.where(eq(users.id, currentUserId))
 						.returning();
 
 					if (!updatedUser) {

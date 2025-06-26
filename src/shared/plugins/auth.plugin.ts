@@ -39,6 +39,7 @@ export const auth = new Elysia()
 						iat: Math.floor(Date.now() / 1000),
 					})) satisfies SignFn,
 				jwtPayload: jwtPayload || null,
+				currentUserId: jwtPayload ? jwtPayload.uid : null,
 			},
 		};
 	})
@@ -59,9 +60,11 @@ export const auth = new Elysia()
 					});
 				}
 
+				const currentUserId = jwtPayload.uid;
+
 				// Check user exists in DB
 				const user = await db.query.users.findFirst({
-					where: eq(users.id, jwtPayload.uid),
+					where: eq(users.id, currentUserId),
 				});
 				if (!user) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {
@@ -69,7 +72,7 @@ export const auth = new Elysia()
 					});
 				}
 
-				return { auth: { ...auth, jwtPayload } };
+				return { auth: { ...auth, jwtPayload, currentUserId } };
 			},
 		},
 	});

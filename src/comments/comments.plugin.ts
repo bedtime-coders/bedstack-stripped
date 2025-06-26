@@ -16,7 +16,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 		app
 			.get(
 				"/",
-				async ({ params: { slug }, auth: { jwtPayload } }) => {
+				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -35,7 +35,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
 					});
 
-					return toCommentsResponse(commentsWithAuthors, jwtPayload?.uid);
+					return toCommentsResponse(commentsWithAuthors, currentUserId);
 				},
 				{
 					detail: {
@@ -57,7 +57,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 				async ({
 					params: { slug },
 					body: { comment },
-					auth: { jwtPayload },
+					auth: { currentUserId },
 				}) => {
 					// Verify article exists
 					const article = await db.query.articles.findFirst({
@@ -74,7 +74,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						.values({
 							body: comment.body,
 							articleId: article.id,
-							authorId: jwtPayload.uid,
+							authorId: currentUserId,
 						})
 						.returning();
 
@@ -96,7 +96,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("comment");
 					}
 
-					return toCommentResponse(commentWithAuthor, jwtPayload.uid);
+					return toCommentResponse(commentWithAuthor, currentUserId);
 				},
 				{
 					detail: {
@@ -109,7 +109,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 			)
 			.delete(
 				"/:id",
-				async ({ params: { slug, id }, auth: { jwtPayload }, set }) => {
+				async ({ params: { slug, id }, auth: { currentUserId }, set }) => {
 					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
@@ -132,7 +132,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("comment");
 					}
 
-					if (existingComment.authorId !== jwtPayload.uid) {
+					if (existingComment.authorId !== currentUserId) {
 						throw new RealWorldError(StatusCodes.FORBIDDEN, {
 							comment: ["you can only delete your own comments"],
 						});
