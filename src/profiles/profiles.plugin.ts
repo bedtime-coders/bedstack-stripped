@@ -35,7 +35,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 									await db.query.follows.findFirst({
 										where: and(
 											eq(follows.followerId, currentUserId),
-											eq(follows.followingId, user.id),
+											eq(follows.followedId, user.id),
 										),
 									}),
 								)
@@ -74,7 +74,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 							.insert(follows)
 							.values({
 								followerId: currentUserId,
-								followingId: user.id,
+								followedId: user.id,
 							})
 							.onConflictDoNothing();
 						return toResponse(user, true);
@@ -105,7 +105,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 							.where(
 								and(
 									eq(follows.followerId, currentUserId),
-									eq(follows.followingId, user.id),
+									eq(follows.followedId, user.id),
 								),
 							);
 						return toResponse(user, false);

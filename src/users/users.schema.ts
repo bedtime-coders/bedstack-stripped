@@ -19,8 +19,12 @@ export const users = pgTable("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-	followers: many(follows),
-	following: many(follows),
+	followers: many(follows, {
+		relationName: "followers", // users that follow this user
+	}),
+	following: many(follows, {
+		relationName: "following", // users that this user is following
+	}),
 	comments: many(comments),
 	articles: many(articles),
 }));

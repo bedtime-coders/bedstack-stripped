@@ -27,15 +27,19 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					}
 
 					// Get comments for the article
-					const commentsWithAuthors = await db.query.comments.findMany({
+					const enrichedComments = await db.query.comments.findMany({
 						where: eq(comments.articleId, article.id),
 						with: {
-							author: true,
+							author: {
+								with: {
+									followers: true,
+								},
+							},
 						},
 						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
 					});
 
-					return toCommentsResponse(commentsWithAuthors, currentUserId);
+					return toCommentsResponse(enrichedComments, currentUserId);
 				},
 				{
 					detail: {

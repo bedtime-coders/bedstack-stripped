@@ -14,7 +14,7 @@ export const follows = pgTable(
 		followerId: uuid("follower_id")
 			.notNull()
 			.references(() => users.id),
-		followingId: uuid("following_id")
+		followedId: uuid("followed_id")
 			.notNull()
 			.references(() => users.id),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -24,10 +24,10 @@ export const follows = pgTable(
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [
-		primaryKey({ columns: [table.followerId, table.followingId] }),
+		primaryKey({ columns: [table.followerId, table.followedId] }),
 		check(
 			"unique_follower_following",
-			sql`${table.followerId} != ${table.followingId}`,
+			sql`${table.followerId} != ${table.followedId}`,
 		),
 	],
 );
@@ -36,9 +36,11 @@ export const followsRelations = relations(follows, ({ one }) => ({
 	follower: one(users, {
 		fields: [follows.followerId],
 		references: [users.id],
+		relationName: "followers",
 	}),
 	following: one(users, {
-		fields: [follows.followingId],
+		fields: [follows.followedId],
 		references: [users.id],
+		relationName: "following",
 	}),
 }));

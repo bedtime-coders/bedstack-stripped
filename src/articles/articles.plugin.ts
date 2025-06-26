@@ -119,10 +119,10 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								: [],
 							currentUserId
 								? db.query.follows.findMany({
-										columns: { followingId: true },
+										columns: { followedId: true },
 										where: and(
 											eq(follows.followerId, currentUserId),
-											inArray(follows.followingId, authorIds),
+											inArray(follows.followedId, authorIds),
 										),
 									})
 								: [],
@@ -189,11 +189,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				}) => {
 					// Step 1: Get followed user IDs
 					const followed = await db
-						.select({ followingId: follows.followingId })
+						.select({ followedId: follows.followedId })
 						.from(follows)
 						.where(eq(follows.followerId, currentUserId));
 
-					const followedIds = followed.map((f) => f.followingId);
+					const followedIds = followed.map((f) => f.followedId);
 					if (followedIds.length === 0) return toArticlesResponse([]);
 
 					// Step 2: Get article IDs from followed authors
@@ -248,10 +248,10 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								),
 							}),
 							db.query.follows.findMany({
-								columns: { followingId: true },
+								columns: { followedId: true },
 								where: and(
 									eq(follows.followerId, currentUserId),
-									inArray(follows.followingId, authorIds),
+									inArray(follows.followedId, authorIds),
 								),
 							}),
 						]);
