@@ -45,7 +45,7 @@ export async function toCommentResponse(
 				.where(
 					and(
 						eq(follows.followerId, currentUserId),
-						eq(follows.followingId, comment.author.id),
+						eq(follows.followedId, comment.author.id),
 					),
 				);
 			following = Boolean(follow);
@@ -109,19 +109,19 @@ export async function toCommentsResponse(
 
 			if (uniqueAuthorIds.length > 0) {
 				const followRelationships = await db
-					.select({ followingId: follows.followingId })
+					.select({ followedId: follows.followedId })
 					.from(follows)
 					.where(
 						and(
 							eq(follows.followerId, currentUserId),
-							inArray(follows.followingId, uniqueAuthorIds),
+							inArray(follows.followedId, uniqueAuthorIds),
 						),
 					);
 
 				// Create a map of author ID to following status
 				followingStatus = followRelationships.reduce(
 					(acc, relation) => {
-						acc[relation.followingId] = true;
+						acc[relation.followedId] = true;
 						return acc;
 					},
 					{} as Record<string, boolean>,
