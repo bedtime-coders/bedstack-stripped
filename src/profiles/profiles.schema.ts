@@ -36,11 +36,11 @@ export const followsRelations = relations(follows, ({ one }) => ({
 	follower: one(users, {
 		fields: [follows.followerId],
 		references: [users.id],
-		relationName: "followers",
+		relationName: "followers", // I am the followerId in those rows
 	}),
-	following: one(users, {
+	followed: one(users, {
 		fields: [follows.followedId],
 		references: [users.id],
-		relationName: "following",
+		relationName: "following", // I am the followedId in those rows
 	}),
 }));
