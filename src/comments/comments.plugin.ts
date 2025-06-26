@@ -3,6 +3,7 @@ import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { articles } from "@/articles/articles.schema";
 import { db } from "@/core/db";
+import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { commentsModel, UUID } from "./comments.model";
@@ -39,7 +40,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
 					});
 
-					return toCommentsResponse(enrichedComments, currentUserId);
+					return toCommentsResponse(enrichedComments, { currentUserId });
 				},
 				{
 					detail: {
@@ -92,7 +93,11 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					const commentWithAuthor = await db.query.comments.findFirst({
 						where: eq(comments.id, createdComment.id),
 						with: {
-							author: true,
+							author: {
+								with: {
+									followers: true,
+								},
+							},
 						},
 					});
 
@@ -100,7 +105,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("comment");
 					}
 
-					return toCommentResponse(commentWithAuthor, currentUserId);
+					return toCommentResponse(commentWithAuthor, { currentUserId });
 				},
 				{
 					detail: {
