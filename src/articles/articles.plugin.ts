@@ -8,7 +8,7 @@ import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
-import { articleTags, tags } from "@/tags/tags.schema";
+import { articlesToTags, tags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 import { ArticleQuery, articlesModel, FeedQuery } from "./articles.model";
 import { articles, favorites } from "./articles.schema";
@@ -60,8 +60,8 @@ export const articlesPlugin = new Elysia({
 					const filteredArticleIds = await db
 						.select({ id: articles.id })
 						.from(articles)
-						.leftJoin(articleTags, eq(articleTags.articleId, articles.id))
-						.leftJoin(tags, eq(tags.id, articleTags.tagId))
+						.leftJoin(articlesToTags, eq(articlesToTags.articleId, articles.id))
+						.leftJoin(tags, eq(tags.id, articlesToTags.tagId))
 						.leftJoin(favorites, eq(favorites.articleId, articles.id))
 						.where(
 							and(
@@ -334,7 +334,7 @@ export const articlesPlugin = new Elysia({
 
 						const createdTags = sift(await Promise.all(tagPromises));
 
-						await db.insert(articleTags).values(
+						await db.insert(articlesToTags).values(
 							createdTags.map((tag) => ({
 								articleId: createdArticle.id,
 								tagId: tag.id,
@@ -430,8 +430,8 @@ export const articlesPlugin = new Elysia({
 					if (article.tagList !== undefined) {
 						// Remove existing tags
 						await db
-							.delete(articleTags)
-							.where(eq(articleTags.articleId, existingArticle.id));
+							.delete(articlesToTags)
+							.where(eq(articlesToTags.articleId, existingArticle.id));
 
 						// Add new tags
 						if (article.tagList.length > 0) {
@@ -465,7 +465,7 @@ export const articlesPlugin = new Elysia({
 
 							const createdTags = sift(await Promise.all(tagPromises));
 
-							await db.insert(articleTags).values(
+							await db.insert(articlesToTags).values(
 								createdTags.map((tag) => ({
 									articleId: existingArticle.id,
 									tagId: tag.id,

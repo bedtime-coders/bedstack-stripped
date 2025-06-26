@@ -8,8 +8,8 @@ import {
 import { comments, commentsRelations } from "@/comments/comments.schema";
 import { follows } from "@/profiles/profiles.schema";
 import {
-	articleTags,
-	articleTagsRelations,
+	articlesToTags,
+	articleToTagsRelations,
 	tags,
 	tagsRelations,
 } from "@/tags/tags.schema";
@@ -22,12 +22,12 @@ export const db = drizzle(env.DATABASE_URL, {
 		follows,
 		articles,
 		tags,
-		articleTags,
+		articleTags: articlesToTags,
 		favorites,
 		comments,
 		articlesRelations,
 		tagsRelations,
-		articleTagsRelations,
+		articleTagsRelations: articleToTagsRelations,
 		favoritesRelations,
 		commentsRelations,
 	},

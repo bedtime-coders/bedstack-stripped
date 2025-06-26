@@ -7,7 +7,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { articleTags } from "@/tags/tags.schema";
+import { articlesToTags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 
 export const articles = pgTable(
@@ -57,7 +57,7 @@ export const articlesRelations = relations(articles, ({ one, many }) => ({
 		fields: [articles.authorId],
 		references: [users.id],
 	}),
-	tags: many(articleTags),
+	tags: many(articlesToTags),
 	favorites: many(favorites),
 }));
 

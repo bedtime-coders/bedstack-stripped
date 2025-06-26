@@ -11,8 +11,8 @@ export const tags = pgTable(
 	(table) => [index("tags_name_idx").on(table.name)],
 );
 
-export const articleTags = pgTable(
-	"article_tags",
+export const articlesToTags = pgTable(
+	"articles_to_tags",
 	{
 		articleId: uuid("article_id")
 			.notNull()
@@ -23,22 +23,22 @@ export const articleTags = pgTable(
 	},
 	(table) => [
 		primaryKey({ columns: [table.articleId, table.tagId] }),
-		index("article_tags_article_id_idx").on(table.articleId),
-		index("article_tags_tag_id_idx").on(table.tagId),
+		index("articles_to_tags_article_id_idx").on(table.articleId),
+		index("articles_to_tags_tag_id_idx").on(table.tagId),
 	],
 );
 
 export const tagsRelations = relations(tags, ({ many }) => ({
-	articleTags: many(articleTags),
+	articleTags: many(articlesToTags),
 }));
 
-export const articleTagsRelations = relations(articleTags, ({ one }) => ({
+export const articleToTagsRelations = relations(articlesToTags, ({ one }) => ({
 	article: one(articles, {
-		fields: [articleTags.articleId],
+		fields: [articlesToTags.articleId],
 		references: [articles.id],
 	}),
 	tag: one(tags, {
-		fields: [articleTags.tagId],
+		fields: [articlesToTags.tagId],
 		references: [tags.id],
 	}),
 }));
