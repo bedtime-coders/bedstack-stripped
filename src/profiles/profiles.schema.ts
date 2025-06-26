@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
 	check,
 	pgTable,
@@ -31,3 +31,14 @@ export const follows = pgTable(
 		),
 	],
 );
+
+export const followsRelations = relations(follows, ({ one }) => ({
+	follower: one(users, {
+		fields: [follows.followerId],
+		references: [users.id],
+	}),
+	following: one(users, {
+		fields: [follows.followingId],
+		references: [users.id],
+	}),
+}));

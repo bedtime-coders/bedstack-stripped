@@ -27,7 +27,6 @@ export const comments = pgTable(
 	],
 );
 
-// Relations
 export const commentsRelations = relations(comments, ({ one }) => ({
 	article: one(articles, {
 		fields: [comments.articleId],

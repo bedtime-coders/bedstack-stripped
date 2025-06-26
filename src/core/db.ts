@@ -6,7 +6,7 @@ import {
 	favoritesRelations,
 } from "@/articles/articles.schema";
 import { comments, commentsRelations } from "@/comments/comments.schema";
-import { follows } from "@/profiles/profiles.schema";
+import { follows, followsRelations } from "@/profiles/profiles.schema";
 import {
 	articlesToTags,
 	articlesToTagsRelations,
@@ -30,6 +30,7 @@ export const db = drizzle(env.DATABASE_URL, {
 		articlesToTagsRelations,
 		favoritesRelations,
 		commentsRelations,
+		followsRelations,
 	},
 	logger: env.LOG_LEVEL === "debug",
 });

@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/bun-sql";
 import { reset, seed } from "drizzle-seed";
 import { draw } from "radashi";
 import * as articlesSchema from "@/articles/articles.schema";
+import * as commentsSchema from "@/comments/comments.schema";
 import { env } from "@/core/env";
 import * as profilesSchema from "@/profiles/profiles.schema";
 import * as tagsSchema from "@/tags/tags.schema";
@@ -17,6 +18,7 @@ const schema = {
 	...profilesSchema,
 	...tagsSchema,
 	...articlesSchema,
+	...commentsSchema,
 };
 
 // See: https://github.com/drizzle-team/drizzle-orm/issues/3599

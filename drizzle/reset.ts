@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { drizzle } from "drizzle-orm/bun-sql";
 import { reset } from "drizzle-seed";
 import * as articlesSchema from "@/articles/articles.schema";
+import * as commentsSchema from "@/comments/comments.schema";
 import { env } from "@/core/env";
 import * as profilesSchema from "@/profiles/profiles.schema";
 import * as tagsSchema from "@/tags/tags.schema";
@@ -12,6 +13,7 @@ const schema = {
 	...profilesSchema,
 	...tagsSchema,
 	...articlesSchema,
+	...commentsSchema,
 };
 
 console.info(chalk.gray("Resetting database"));
