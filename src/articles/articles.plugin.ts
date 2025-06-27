@@ -92,7 +92,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						}
 					}
 
-					const articlesWithData = await db.query.articles.findMany({
+					const enrichedArticles = await db.query.articles.findMany({
 						where:
 							whereConditions.length > 0 ? and(...whereConditions) : undefined,
 						with: {
@@ -108,13 +108,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						offset,
 					});
 
-					if (articlesWithData.length === 0) return toArticlesResponse([]);
+					if (enrichedArticles.length === 0) return toArticlesResponse([]);
 					if (!currentUserId) {
-						return toArticlesResponse(articlesWithData);
+						return toArticlesResponse(enrichedArticles);
 					}
 
-					const articleIds = articlesWithData.map((a) => a.id);
-					const authorIds = articlesWithData.map((a) => a.author.id);
+					const articleIds = enrichedArticles.map((a) => a.id);
+					const authorIds = enrichedArticles.map((a) => a.author.id);
 
 					// Load extras (favorited, favorites count, following) - batched
 					const [favoritesCounts, userFavorites, followStatus] =
@@ -147,7 +147,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								),
 						]);
 
-					return toArticlesResponse(articlesWithData, {
+					return toArticlesResponse(enrichedArticles, {
 						userFavorites,
 						followStatus,
 						favoritesCounts,
@@ -259,7 +259,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					if (followedIds.length === 0) return toArticlesResponse([]);
 
 					// Get articles from followed authors
-					const articlesWithData = await db.query.articles.findMany({
+					const enrichedArticles = await db.query.articles.findMany({
 						where: inArray(articles.authorId, followedIds),
 						with: {
 							author: true,
@@ -274,10 +274,10 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						offset,
 					});
 
-					if (articlesWithData.length === 0) return toArticlesResponse([]);
+					if (enrichedArticles.length === 0) return toArticlesResponse([]);
 
-					const articleIds = articlesWithData.map((a) => a.id);
-					const authorIds = articlesWithData.map((a) => a.author.id);
+					const articleIds = enrichedArticles.map((a) => a.id);
+					const authorIds = enrichedArticles.map((a) => a.author.id);
 
 					// Get favorites count, user favorited, follow status
 					const [favoritesCounts, userFavorites, followStatus] =
@@ -310,7 +310,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								),
 						]);
 
-					return toArticlesResponse(articlesWithData, {
+					return toArticlesResponse(enrichedArticles, {
 						userFavorites,
 						followStatus,
 						favoritesCounts,
