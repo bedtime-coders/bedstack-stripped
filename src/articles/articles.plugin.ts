@@ -54,45 +54,33 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						return toArticlesResponse([]);
 					}
 
-					// Build where conditions
+					// Build dynamic filters
 					const filters = [];
 					if (authorUser) {
 						filters.push(eq(articles.authorId, authorUser.id));
 					}
 					if (favoritedUser) {
-						// For favorited filter, we need to check if the article has a favorite by this user
-						const favoritedArticleIds = await db
-							.select({ articleId: favorites.articleId })
-							.from(favorites)
-							.where(eq(favorites.userId, favoritedUser.id));
-						if (favoritedArticleIds.length > 0) {
-							filters.push(
-								inArray(
-									articles.id,
-									favoritedArticleIds.map((f) => f.articleId),
-								),
-							);
-						} else {
-							return toArticlesResponse([]);
-						}
+						filters.push(
+							inArray(
+								articles.id,
+								db
+									.select({ articleId: favorites.articleId })
+									.from(favorites)
+									.where(eq(favorites.userId, favoritedUser.id)),
+							),
+						);
 					}
 					if (tag) {
-						// For tag filter, we need to check if the article has this tag
-						const taggedArticleIds = await db
-							.select({ articleId: articlesToTags.articleId })
-							.from(articlesToTags)
-							.innerJoin(tags, eq(tags.id, articlesToTags.tagId))
-							.where(eq(tags.name, tag));
-						if (taggedArticleIds.length > 0) {
-							filters.push(
-								inArray(
-									articles.id,
-									taggedArticleIds.map((t) => t.articleId),
-								),
-							);
-						} else {
-							return toArticlesResponse([]);
-						}
+						filters.push(
+							inArray(
+								articles.id,
+								db
+									.select({ articleId: articlesToTags.articleId })
+									.from(articlesToTags)
+									.innerJoin(tags, eq(tags.id, articlesToTags.tagId))
+									.where(eq(tags.name, tag)),
+							),
+						);
 					}
 
 					const enrichedArticles: EnrichedArticle[] =
