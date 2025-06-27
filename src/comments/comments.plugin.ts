@@ -17,16 +17,13 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 			.get(
 				"/",
 				async ({ params: { slug }, auth: { currentUserId } }) => {
-					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 					});
-
 					if (!article) {
 						throw new NotFoundError("article");
 					}
 
-					// Get comments for the article
 					const enrichedComments = await db.query.comments.findMany({
 						with: {
 							author: {
@@ -38,7 +35,6 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						where: eq(comments.articleId, article.id),
 						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
 					});
-
 					return toCommentsResponse(enrichedComments, { currentUserId });
 				},
 				{
@@ -63,16 +59,13 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					body: { comment },
 					auth: { currentUserId },
 				}) => {
-					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 					});
-
 					if (!article) {
 						throw new NotFoundError("article");
 					}
 
-					// Create comment
 					const [createdComment] = await db
 						.insert(comments)
 						.values({
@@ -81,15 +74,13 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 							authorId: currentUserId,
 						})
 						.returning();
-
 					if (!createdComment) {
 						throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
 							comment: ["failed to create"],
 						});
 					}
 
-					// Get comment with author
-					const commentWithAuthor = await db.query.comments.findFirst({
+					const enrichedComment = await db.query.comments.findFirst({
 						where: eq(comments.id, createdComment.id),
 						with: {
 							author: {
@@ -99,12 +90,11 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 							},
 						},
 					});
-
-					if (!commentWithAuthor) {
+					if (!enrichedComment) {
 						throw new NotFoundError("comment");
 					}
 
-					return toCommentResponse(commentWithAuthor, { currentUserId });
+					return toCommentResponse(enrichedComment, { currentUserId });
 				},
 				{
 					detail: {
@@ -118,20 +108,16 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 			.delete(
 				"/:id",
 				async ({ params: { slug, id }, auth: { currentUserId }, set }) => {
-					// Verify article exists
 					const article = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 					});
-
 					if (!article) {
 						throw new NotFoundError("article");
 					}
 
-					// Verify comment exists and user owns it
 					const existingComment = await db.query.comments.findFirst({
 						where: eq(comments.id, id),
 					});
-
 					if (!existingComment) {
 						throw new NotFoundError("comment");
 					}
@@ -146,7 +132,6 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						});
 					}
 
-					// Delete comment
 					await db.delete(comments).where(eq(comments.id, id));
 
 					set.status = StatusCodes.NO_CONTENT;
