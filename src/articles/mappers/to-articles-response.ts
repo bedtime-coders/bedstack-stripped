@@ -16,8 +16,8 @@ export function toArticlesResponse(
 		const myFollows =
 			article.author.followers?.filter((f) => f.followerId === currentUserId) ??
 			[];
-		const favoritesCount = myFavorites.length;
-		const isFavorited = favoritesCount > 0;
+		const favoritesCount = article.favorites?.length ?? 0;
+		const isFavorited = myFavorites.length > 0;
 		const isFollowing = myFollows.length > 0;
 		return {
 			slug: article.slug,

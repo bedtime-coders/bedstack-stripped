@@ -97,7 +97,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						with: {
 							author: {
 								with: {
-									followers: true,
+									followers: currentUserId
+										? {
+												where: eq(follows.followerId, currentUserId),
+											}
+										: true,
 								},
 							},
 							tags: {
@@ -216,7 +220,9 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						with: {
 							author: {
 								with: {
-									followers: true,
+									followers: {
+										where: eq(follows.followerId, currentUserId),
+									},
 								},
 							},
 							tags: {
@@ -497,6 +503,30 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							userId: currentUserId,
 							articleId: enrichedArticle.id,
 						});
+
+						// Reload the article to get updated favorites count
+						const updatedArticle = await db.query.articles.findFirst({
+							where: eq(articles.slug, slug),
+							with: {
+								author: {
+									with: {
+										followers: {
+											where: eq(follows.followerId, currentUserId),
+										},
+									},
+								},
+								tags: {
+									with: {
+										tag: true,
+									},
+								},
+								favorites: true,
+							},
+						});
+
+						if (updatedArticle) {
+							return toResponse(updatedArticle, { currentUserId });
+						}
 					}
 
 					return toResponse(enrichedArticle, { currentUserId });
@@ -550,11 +580,33 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									eq(favorites.articleId, enrichedArticle.id),
 								),
 							);
+
+						// Reload the article to get updated favorites count
+						const updatedArticle = await db.query.articles.findFirst({
+							where: eq(articles.slug, slug),
+							with: {
+								author: {
+									with: {
+										followers: {
+											where: eq(follows.followerId, currentUserId),
+										},
+									},
+								},
+								tags: {
+									with: {
+										tag: true,
+									},
+								},
+								favorites: true,
+							},
+						});
+
+						if (updatedArticle) {
+							return toResponse(updatedArticle, { currentUserId });
+						}
 					}
 
-					return toResponse(enrichedArticle, {
-						currentUserId,
-					});
+					return toResponse(enrichedArticle, { currentUserId });
 				},
 				{
 					detail: {

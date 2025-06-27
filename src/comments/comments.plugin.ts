@@ -3,6 +3,7 @@ import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { articles } from "@/articles/articles.schema";
 import { db } from "@/core/db";
+import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { commentsModel, UUID } from "./comments.model";
@@ -28,7 +29,11 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						with: {
 							author: {
 								with: {
-									followers: true,
+									followers: currentUserId
+										? {
+												where: eq(follows.followerId, currentUserId),
+											}
+										: true,
 								},
 							},
 						},
@@ -85,7 +90,11 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						with: {
 							author: {
 								with: {
-									followers: true,
+									followers: currentUserId
+										? {
+												where: eq(follows.followerId, currentUserId),
+											}
+										: true,
 								},
 							},
 						},
