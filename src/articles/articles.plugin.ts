@@ -26,7 +26,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				"/",
 				async ({
 					query: {
-						tag,
+						tag: tagName,
 						author: authorUsername,
 						favorited: favoritedByUsername,
 						limit = DEFAULT_LIMIT,
@@ -70,7 +70,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							),
 						);
 					}
-					if (tag) {
+					if (tagName) {
 						filters.push(
 							inArray(
 								articles.id,
@@ -78,7 +78,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									.select({ articleId: articlesToTags.articleId })
 									.from(articlesToTags)
 									.innerJoin(tags, eq(tags.id, articlesToTags.tagId))
-									.where(eq(tags.name, tag)),
+									.where(eq(tags.name, tagName)),
 							),
 						);
 					}
