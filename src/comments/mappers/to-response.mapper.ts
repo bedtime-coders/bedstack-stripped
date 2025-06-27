@@ -1,7 +1,4 @@
-import type { InferSelectModel } from "drizzle-orm";
-import type { follows } from "@/profiles/profiles.schema";
-import type { users } from "@/users/users.schema";
-import type { comments } from "../comments.schema";
+import type { EnrichedComment } from "../interfaces";
 
 /**
  * Map a comment to a response
@@ -11,11 +8,7 @@ import type { comments } from "../comments.schema";
  * @returns The mapped comment
  */
 export function toCommentResponse(
-	enrichedComment: InferSelectModel<typeof comments> & {
-		author: InferSelectModel<typeof users> & {
-			followers: InferSelectModel<typeof follows>[];
-		};
-	},
+	enrichedComment: EnrichedComment,
 	{ currentUserId }: { currentUserId?: string | null } = {},
 ): {
 	comment: {
@@ -43,7 +36,7 @@ export function toCommentResponse(
 				image: enrichedComment.author.image,
 				following: Boolean(
 					currentUserId &&
-						enrichedComment.author.followers.some(
+						enrichedComment.author.followers?.some(
 							(f) => f.followerId === currentUserId,
 						),
 				),
@@ -59,13 +52,7 @@ export function toCommentResponse(
  * @returns The mapped comments
  */
 export function toCommentsResponse(
-	enrichedComments: Array<
-		InferSelectModel<typeof comments> & {
-			author: InferSelectModel<typeof users> & {
-				followers: InferSelectModel<typeof follows>[];
-			};
-		}
-	>,
+	enrichedComments: EnrichedComment[],
 	{ currentUserId }: { currentUserId?: string | null } = {},
 ): {
 	comments: Array<{
