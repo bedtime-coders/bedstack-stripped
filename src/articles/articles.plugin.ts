@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/db";
@@ -95,61 +95,30 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						where:
 							whereConditions.length > 0 ? and(...whereConditions) : undefined,
 						with: {
-							author: true,
+							author: {
+								with: {
+									followers: true,
+								},
+							},
 							tags: {
 								with: {
 									tag: true,
 								},
 							},
+							favorites: true,
 						},
 						orderBy: [desc(articles.createdAt)],
 						limit,
 						offset,
 					});
 
-					if (enrichedArticles.length === 0) return toArticlesResponse([]);
-					if (!currentUserId) {
-						return toArticlesResponse(enrichedArticles);
-					}
-
-					const articleIds = enrichedArticles.map((a) => a.id);
-					const authorIds = enrichedArticles.map((a) => a.author.id);
-
-					// Load extras (favorited, favorites count, following) - batched
-					const [favoritesCounts, userFavorites, followStatus] =
-						await Promise.all([
-							db
-								.select({
-									articleId: favorites.articleId,
-									_count: count().as("_count"),
-								})
-								.from(favorites)
-								.where(inArray(favorites.articleId, articleIds))
-								.groupBy(favorites.articleId),
-							db.query.favorites.findMany({
-								columns: { articleId: true },
-								where: and(
-									eq(favorites.userId, currentUserId),
-									inArray(favorites.articleId, articleIds),
-								),
-							}),
-							db.query.follows
-								.findMany({
-									columns: { followedId: true },
-									where: and(
-										eq(follows.followerId, currentUserId),
-										inArray(follows.followedId, authorIds),
-									),
-								})
-								.then((follows) =>
-									follows.map((f) => ({ followingId: f.followedId })),
-								),
-						]);
+					// if (enrichedArticles.length === 0) return toArticlesResponse([]);
+					// if (!currentUserId) {
+					// 	return toArticlesResponse(enrichedArticles);
+					// }
 
 					return toArticlesResponse(enrichedArticles, {
-						userFavorites,
-						followStatus,
-						favoritesCounts,
+						currentUserId,
 					});
 				},
 				{
@@ -182,11 +151,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							throw new NotFoundError("article");
 						}
 
-						return toResponse(enrichedArticle, {
-							favorited: false,
-							favoritesCount: 0,
-							following: false,
-						});
+						return toResponse(enrichedArticle);
 					}
 
 					const enrichedArticle = await db.query.articles.findFirst({
@@ -212,13 +177,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(enrichedArticle, {
-						favorited: enrichedArticle.favorites.some(
-							(fav) => fav.userId === currentUserId,
-						),
-						favoritesCount: enrichedArticle.favorites.length,
-						following: enrichedArticle.author.followers.length > 0,
-					});
+					return toResponse(enrichedArticle, { currentUserId });
 				},
 				{
 					detail: {
@@ -255,58 +214,27 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					const enrichedArticles = await db.query.articles.findMany({
 						where: inArray(articles.authorId, followedIds),
 						with: {
-							author: true,
+							author: {
+								with: {
+									followers: true,
+								},
+							},
 							tags: {
 								with: {
 									tag: true,
 								},
 							},
+							favorites: true,
 						},
 						orderBy: [desc(articles.createdAt)],
 						limit,
 						offset,
 					});
 
-					if (enrichedArticles.length === 0) return toArticlesResponse([]);
-
-					const articleIds = enrichedArticles.map((a) => a.id);
-					const authorIds = enrichedArticles.map((a) => a.author.id);
-
-					// Get favorites count, user favorited, follow status
-					const [favoritesCounts, userFavorites, followStatus] =
-						await Promise.all([
-							db
-								.select({
-									articleId: favorites.articleId,
-									_count: count().as("_count"),
-								})
-								.from(favorites)
-								.where(inArray(favorites.articleId, articleIds))
-								.groupBy(favorites.articleId),
-							db.query.favorites.findMany({
-								columns: { articleId: true },
-								where: and(
-									eq(favorites.userId, currentUserId),
-									inArray(favorites.articleId, articleIds),
-								),
-							}),
-							db.query.follows
-								.findMany({
-									columns: { followedId: true },
-									where: and(
-										eq(follows.followerId, currentUserId),
-										inArray(follows.followedId, authorIds),
-									),
-								})
-								.then((follows) =>
-									follows.map((f) => ({ followingId: f.followedId })),
-								),
-						]);
+					// if (enrichedArticles.length === 0) return toArticlesResponse([]);
 
 					return toArticlesResponse(enrichedArticles, {
-						userFavorites,
-						followStatus,
-						favoritesCounts,
+						currentUserId,
 					});
 				},
 				{
@@ -374,11 +302,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					return toResponse(enrichedArticle, {
-						favorited: false,
-						favoritesCount: 0,
-						following: false, // you can't follow yourself
-					});
+					return toResponse(enrichedArticle);
 				},
 				{
 					detail: {
@@ -485,15 +409,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					const isFavorited = enrichedArticle.favorites.some(
-						(fav) => fav.userId === currentUserId,
-					);
-
-					return toResponse(enrichedArticle, {
-						favorited: isFavorited,
-						favoritesCount: enrichedArticle.favorites.length,
-						following: enrichedArticle.author.followers.length > 0,
-					});
+					return toResponse(enrichedArticle, { currentUserId });
 				},
 				{
 					detail: {
@@ -571,7 +487,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					const currentFavoritesCount = enrichedArticle.favorites.length;
 					const isAlreadyFavorited = enrichedArticle.favorites.some(
 						(fav) => fav.userId === currentUserId,
 					);
@@ -584,12 +499,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						});
 					}
 
-					return toResponse(enrichedArticle, {
-						favorited: true,
-						favoritesCount:
-							currentFavoritesCount + (isAlreadyFavorited ? 0 : 1),
-						following: enrichedArticle.author.followers.length > 0,
-					});
+					return toResponse(enrichedArticle, { currentUserId });
 				},
 				{
 					detail: {
@@ -626,7 +536,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					const currentFavoritesCount = enrichedArticle.favorites.length;
 					const isAlreadyFavorited = enrichedArticle.favorites.some(
 						(fav) => fav.userId === currentUserId,
 					);
@@ -644,10 +553,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					}
 
 					return toResponse(enrichedArticle, {
-						favorited: false,
-						favoritesCount:
-							currentFavoritesCount - (isAlreadyFavorited ? 1 : 0),
-						following: enrichedArticle.author.followers.length > 0,
+						currentUserId,
 					});
 				},
 				{

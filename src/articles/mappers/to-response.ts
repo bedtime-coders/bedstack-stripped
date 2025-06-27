@@ -2,17 +2,10 @@ import type { EnrichedArticle } from "../interfaces";
 
 type ToResponseParams = {
 	/**
-	 * Whether the article is favorited
+	 * The ID of the current user
+	 * If provided, the article will be enriched with the current user's information, including article favorites and author following
 	 */
-	favorited: boolean;
-	/**
-	 * The number of favorites
-	 */
-	favoritesCount: number;
-	/**
-	 * Whether the current user is following the article author
-	 */
-	following: boolean;
+	currentUserId?: string | null;
 };
 
 /**
@@ -23,7 +16,7 @@ type ToResponseParams = {
  */
 export function toResponse(
 	article: EnrichedArticle,
-	{ favorited, favoritesCount, following }: ToResponseParams,
+	{ currentUserId }: ToResponseParams = {},
 ): {
 	article: {
 		slug: string;
@@ -43,6 +36,12 @@ export function toResponse(
 		};
 	};
 } {
+	const favorited = article.favorites?.some((f) => f.userId === currentUserId);
+	const favoritesCount = article.favorites?.length ?? 0;
+	const following = article.author.followers?.some(
+		(f) => f.followerId === currentUserId,
+	);
+
 	return {
 		article: {
 			slug: article.slug,
@@ -54,13 +53,13 @@ export function toResponse(
 				.sort((a, b) => a.localeCompare(b)),
 			createdAt: article.createdAt.toISOString(),
 			updatedAt: article.updatedAt.toISOString(),
-			favorited,
-			favoritesCount,
+			favorited: favorited ?? false,
+			favoritesCount: favoritesCount ?? 0,
 			author: {
 				username: article.author.username,
 				bio: article.author.bio,
 				image: article.author.image,
-				following,
+				following: following ?? false,
 			},
 		},
 	};
