@@ -215,15 +215,9 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					// Get favorites count
-					const [favoritesCountResult] = await db
-						.select({ count: count() })
-						.from(favorites)
-						.where(eq(favorites.articleId, enrichedArticle.id));
-
 					return toResponse(enrichedArticle, {
 						favorited: enrichedArticle.favorites.length > 0,
-						favoritesCount: Number(favoritesCountResult?.count || 0),
+						favoritesCount: enrichedArticle.favorites.length,
 						following: enrichedArticle.author.followers.length > 0,
 					});
 				},
@@ -331,32 +325,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				async ({ body: { article }, auth: { currentUserId } }) => {
 					const slug = slugify(article.title);
 
-					// Upsert tags
 					const tagList = article.tagList ?? [];
-					const createdTags = await Promise.all(
-						tagList.map(async (name) => {
-							const existingTag = await db.query.tags.findFirst({
-								where: eq(tags.name, name),
-							});
-							if (existingTag) {
-								return existingTag;
-							}
+					const createdTags = await db
+						.insert(tags)
+						.values(tagList.map((name) => ({ name })))
+						.onConflictDoNothing()
+						.returning();
 
-							const [newTag] = await db
-								.insert(tags)
-								.values({ name })
-								.returning();
-
-							if (!newTag) {
-								throw new RealWorldError(StatusCodes.INTERNAL_SERVER_ERROR, {
-									tag: [`failed to create tag: ${name}`],
-								});
-							}
-							return newTag;
-						}),
-					);
-
-					// Create article
 					const [createdArticle] = await db
 						.insert(articles)
 						.values({
@@ -374,7 +349,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						});
 					}
 
-					// Connect tags
 					if (createdTags.length > 0) {
 						await db.insert(articlesToTags).values(
 							createdTags.map((tag) => ({
@@ -384,7 +358,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						);
 					}
 
-					// Get created article with relations
 					const enrichedArticle = await db.query.articles.findFirst({
 						where: eq(articles.id, createdArticle.id),
 						with: {
