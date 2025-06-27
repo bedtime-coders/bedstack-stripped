@@ -4,15 +4,15 @@
 	"description": "⚡ Stripped version of Bedstack for rapid prototyping",
 	"type": "module",
 	"scripts": {
-		"dev": "bun run --watch src/index.ts",
-		"build": "bun build src/index.ts --outdir dist --target=bun --sourcemap",
-		"preview": "bun run dist/index.js",
+		"dev": "bun run --watch src",
+		"build": "bun build src --outdir dist --target=bun --sourcemap",
+		"preview": "bun run dist",
 		"fix": "biome check --write",
 		"check": "biome check",
 		"check:errors": "biome check --diagnostic-level=error",
 		"typecheck": "tsc --noEmit",
 		"clean": "rimraf node_modules bun.lockb dist",
-		"test:api": "bun run scripts/test-api",
+		"test:api": "bun run scripts/test/api",
 		"test:unit": "bun test",
 		"test": "bun test:api && bun test:unit",
 		"db": "docker compose up",
@@ -25,8 +25,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:studio": "drizzle-kit studio",
 		"db:migrate": "drizzle-kit migrate",
-		"db:seed": "bun run drizzle/seed.ts",
-		"db:reset": "bun run drizzle/reset.ts"
+		"db:seed": "bun run scripts/db/seed",
+		"db:reset": "bun run scripts/db/reset"
 	},
 	"dependencies": {
 		"@bedtime-coders/elysia-openapi": "^1.1.0",
