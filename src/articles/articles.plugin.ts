@@ -1,7 +1,6 @@
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
-import { Elysia, NotFoundError } from "elysia";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { sift } from "radashi";
 import { db } from "@/core/db";
 import { follows } from "@/profiles/profiles.schema";
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
@@ -510,7 +509,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			)
 			.delete(
 				"/:slug",
-				async ({ params: { slug }, auth: { currentUserId } }) => {
+				async ({ params: { slug }, auth: { currentUserId }, set }) => {
 					const existingArticle = await db.query.articles.findFirst({
 						where: eq(articles.slug, slug),
 					});
@@ -527,11 +526,16 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 
 					await db.delete(articles).where(eq(articles.id, existingArticle.id));
 
-					return new Response(null, { status: StatusCodes.NO_CONTENT });
+					set.status = StatusCodes.NO_CONTENT;
 				},
 				{
 					detail: {
 						summary: "Delete Article",
+					},
+					response: {
+						[StatusCodes.NO_CONTENT]: t.Void({
+							description: "No content",
+						}),
 					},
 				},
 			)

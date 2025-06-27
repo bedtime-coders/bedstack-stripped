@@ -143,7 +143,9 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					},
 					params: t.Object({ id: UUID, slug: t.String() }),
 					response: {
-						[StatusCodes.NO_CONTENT]: t.Void(),
+						[StatusCodes.NO_CONTENT]: t.Void({
+							description: "No content",
+						}),
 					},
 				},
 			),
