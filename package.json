@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bun run --watch src",
-		"build": "bun run scripts/build",
+		"build": "bun run scripts/build.sh",
 		"preview": "bun run dist",
 		"fix": "biome check --write",
 		"check": "biome check",
