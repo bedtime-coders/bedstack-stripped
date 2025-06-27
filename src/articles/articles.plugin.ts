@@ -123,11 +123,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							offset,
 						});
 
-					// if (enrichedArticles.length === 0) return toArticlesResponse([]);
-					// if (!currentUserId) {
-					// 	return toArticlesResponse(enrichedArticles);
-					// }
-
 					return toArticlesResponse(enrichedArticles, {
 						currentUserId,
 					});
@@ -227,11 +222,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							offset,
 						});
 
-					// if (enrichedArticles.length === 0) return toArticlesResponse([]);
-
-					return toArticlesResponse(enrichedArticles, {
-						currentUserId,
-					});
+					return toArticlesResponse(enrichedArticles, { currentUserId });
 				},
 				{
 					detail: {
