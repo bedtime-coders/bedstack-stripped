@@ -93,11 +93,9 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						with: {
 							author: {
 								with: {
-									followers: currentUserId
-										? {
-												where: eq(follows.followerId, currentUserId),
-											}
-										: true,
+									followers: {
+										where: eq(follows.followerId, currentUserId),
+									},
 								},
 							},
 						},
