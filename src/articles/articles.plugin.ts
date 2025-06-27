@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { Elysia, NotFoundError } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { sift } from "radashi";
@@ -205,9 +205,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									tag: true,
 								},
 							},
-							favorites: {
-								where: eq(favorites.userId, currentUserId),
-							},
+							favorites: true, // Load all favorites to get count
 						},
 					});
 
@@ -215,8 +213,12 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
+					const isFavorited = enrichedArticle.favorites.some(
+						(fav) => fav.userId === currentUserId,
+					);
+
 					return toResponse(enrichedArticle, {
-						favorited: enrichedArticle.favorites.length > 0,
+						favorited: isFavorited,
 						favoritesCount: enrichedArticle.favorites.length,
 						following: enrichedArticle.author.followers.length > 0,
 					});
@@ -326,11 +328,15 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					const slug = slugify(article.title);
 
 					const tagList = article.tagList ?? [];
-					const createdTags = await db
+
+					await db
 						.insert(tags)
 						.values(tagList.map((name) => ({ name })))
-						.onConflictDoNothing()
-						.returning();
+						.onConflictDoNothing();
+
+					const relevantTags = await db.query.tags.findMany({
+						where: inArray(tags.name, tagList),
+					});
 
 					const [createdArticle] = await db
 						.insert(articles)
@@ -348,15 +354,12 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							article: ["failed to create"],
 						});
 					}
-
-					if (createdTags.length > 0) {
-						await db.insert(articlesToTags).values(
-							createdTags.map((tag) => ({
-								articleId: createdArticle.id,
-								tagId: tag.id,
-							})),
-						);
-					}
+					await db.insert(articlesToTags).values(
+						relevantTags.map((tag) => ({
+							articleId: createdArticle.id,
+							tagId: tag.id,
+						})),
+					);
 
 					const enrichedArticle = await db.query.articles.findFirst({
 						where: eq(articles.id, createdArticle.id),
@@ -438,36 +441,22 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							.delete(articlesToTags)
 							.where(eq(articlesToTags.articleId, existingArticle.id));
 
-						// Add new tags
+						// Add new tags if any
 						if (article.tagList.length > 0) {
-							const updatedTags = await Promise.all(
-								article.tagList.map(async (name) => {
-									const existingTag = await db.query.tags.findFirst({
-										where: eq(tags.name, name),
-									});
-									if (existingTag) {
-										return existingTag;
-									}
+							// Batch insert tags (ignore conflicts)
+							await db
+								.insert(tags)
+								.values(article.tagList.map((name) => ({ name })))
+								.onConflictDoNothing();
 
-									const [newTag] = await db
-										.insert(tags)
-										.values({ name })
-										.returning();
+							// Get all relevant tags in one query
+							const relevantTags = await db.query.tags.findMany({
+								where: inArray(tags.name, article.tagList),
+							});
 
-									if (!newTag) {
-										throw new RealWorldError(
-											StatusCodes.INTERNAL_SERVER_ERROR,
-											{
-												tag: [`failed to create tag: ${name}`],
-											},
-										);
-									}
-									return newTag;
-								}),
-							);
-
+							// Connect tags to article
 							await db.insert(articlesToTags).values(
-								updatedTags.map((tag) => ({
+								relevantTags.map((tag) => ({
 									articleId: existingArticle.id,
 									tagId: tag.id,
 								})),
@@ -491,9 +480,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									tag: true,
 								},
 							},
-							favorites: {
-								where: eq(favorites.userId, currentUserId),
-							},
+							favorites: true, // Load all favorites to get count
 						},
 					});
 
@@ -501,15 +488,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					// Get favorites count
-					const [favoritesCountResult] = await db
-						.select({ count: count() })
-						.from(favorites)
-						.where(eq(favorites.articleId, enrichedArticle.id));
+					const isFavorited = enrichedArticle.favorites.some(
+						(fav) => fav.userId === currentUserId,
+					);
 
 					return toResponse(enrichedArticle, {
-						favorited: enrichedArticle.favorites.length > 0,
-						favoritesCount: Number(favoritesCountResult?.count || 0),
+						favorited: isFavorited,
+						favoritesCount: enrichedArticle.favorites.length,
 						following: enrichedArticle.author.followers.length > 0,
 					});
 				},
@@ -576,9 +561,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									tag: true,
 								},
 							},
-							favorites: {
-								where: eq(favorites.userId, currentUserId),
-							},
+							favorites: true, // Load all favorites to get count
 						},
 					});
 
@@ -586,18 +569,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					// Get favorites count
-					const [favoritesCountResult] = await db
-						.select({ count: count() })
-						.from(favorites)
-						.where(eq(favorites.articleId, enrichedArticle.id));
-
-					const currentFavoritesCount = Number(
-						favoritesCountResult?.count || 0,
+					const currentFavoritesCount = enrichedArticle.favorites.length;
+					const isAlreadyFavorited = enrichedArticle.favorites.some(
+						(fav) => fav.userId === currentUserId,
 					);
 
 					// Only add if not already favorited
-					if (enrichedArticle.favorites.length === 0) {
+					if (!isAlreadyFavorited) {
 						await db.insert(favorites).values({
 							userId: currentUserId,
 							articleId: enrichedArticle.id,
@@ -607,8 +585,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					return toResponse(enrichedArticle, {
 						favorited: true,
 						favoritesCount:
-							currentFavoritesCount +
-							(enrichedArticle.favorites.length === 0 ? 1 : 0),
+							currentFavoritesCount + (isAlreadyFavorited ? 0 : 1),
 						following: enrichedArticle.author.followers.length > 0,
 					});
 				},
@@ -639,9 +616,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 									tag: true,
 								},
 							},
-							favorites: {
-								where: eq(favorites.userId, currentUserId),
-							},
+							favorites: true, // Load all favorites to get count
 						},
 					});
 
@@ -649,37 +624,27 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					// Get favorites count
-					const [favoritesCountResult] = await db
-						.select({ count: count() })
-						.from(favorites)
-						.where(eq(favorites.articleId, enrichedArticle.id));
-
-					const currentFavoritesCount = Number(
-						favoritesCountResult?.count || 0,
+					const currentFavoritesCount = enrichedArticle.favorites.length;
+					const isAlreadyFavorited = enrichedArticle.favorites.some(
+						(fav) => fav.userId === currentUserId,
 					);
 
-					if (enrichedArticle.favorites.length === 0) {
-						return toResponse(enrichedArticle, {
-							favorited: false,
-							favoritesCount: currentFavoritesCount,
-							following: enrichedArticle.author.followers.length > 0,
-						});
+					if (isAlreadyFavorited) {
+						// Delete the favorite
+						await db
+							.delete(favorites)
+							.where(
+								and(
+									eq(favorites.userId, currentUserId),
+									eq(favorites.articleId, enrichedArticle.id),
+								),
+							);
 					}
-
-					// Delete the favorite
-					await db
-						.delete(favorites)
-						.where(
-							and(
-								eq(favorites.userId, currentUserId),
-								eq(favorites.articleId, enrichedArticle.id),
-							),
-						);
 
 					return toResponse(enrichedArticle, {
 						favorited: false,
-						favoritesCount: currentFavoritesCount - 1,
+						favoritesCount:
+							currentFavoritesCount - (isAlreadyFavorited ? 1 : 0),
 						following: enrichedArticle.author.followers.length > 0,
 					});
 				},
