@@ -1,4 +1,4 @@
-import type { ArticlesResponse, ArticlesWithData } from "../interfaces";
+import type { ArticlesResponse, EnrichedArticle } from "../interfaces";
 
 /**
  * The extras to map
@@ -11,44 +11,46 @@ interface Extras {
 	/**
 	 * The user's follow status
 	 */
-	followStatus: { followedId: string }[];
+	followStatus: { followingId: string }[];
 	/**
 	 * The favorites counts
 	 */
-	favoritesCounts: { articleId: string; count: number }[];
+	favoritesCounts: { articleId: string; _count: number }[];
 }
 
 /**
  * Map an array of articles to a response
- * @param articlesWithData The articles to map
+ * @param enrichedArticles The articles to map, each article is enriched with the user's favorites, follow status, and favorites count
  * @param extras The extras to map, see {@link Extras}
  * @returns The mapped articles
  */
-export async function toArticlesResponse(
-	articlesWithData: ArticlesWithData,
+export function toArticlesResponse(
+	enrichedArticles: EnrichedArticle[],
 	extras: Extras = {
 		userFavorites: [],
 		followStatus: [],
 		favoritesCounts: [],
 	},
-): Promise<ArticlesResponse> {
+): ArticlesResponse {
 	const { userFavorites, followStatus, favoritesCounts } = extras;
 	return {
-		articlesCount: articlesWithData.length,
-		articles: articlesWithData.map((article) => {
+		articlesCount: enrichedArticles.length,
+		articles: enrichedArticles.map((article) => {
 			const favoritesCount =
-				favoritesCounts.find((fc) => fc.articleId === article.id)?.count ?? 0;
+				favoritesCounts.find((fc) => fc.articleId === article.id)?._count ?? 0;
 			const isFavorited = userFavorites.some(
 				(fav) => fav.articleId === article.id,
 			);
 			const isFollowing = followStatus.some(
-				(follow) => follow.followedId === article.author.id,
+				(follow) => follow.followingId === article.author.id,
 			);
 			return {
 				slug: article.slug,
 				title: article.title,
 				description: article.description,
-				tagList: article.tags.sort((a, b) => a.localeCompare(b)),
+				tagList: article.tags
+					.map((t) => t.tag.name)
+					.sort((a, b) => a.localeCompare(b)),
 				createdAt: article.createdAt.toISOString(),
 				updatedAt: article.updatedAt.toISOString(),
 				favorited: isFavorited,
