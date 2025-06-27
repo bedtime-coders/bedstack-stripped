@@ -81,7 +81,10 @@ while (followRows.length < 20 && attempts < MAX_ATTEMPTS) {
 		const key = `${follower.id}-${following.id}`;
 		if (!followsData.has(key)) {
 			followsData.add(key);
-			followRows.push({ followerId: follower.id, followingId: following.id });
+			followRows.push({
+				followerId: follower.id,
+				followedId: following.id,
+			});
 		}
 	}
 	attempts++;
