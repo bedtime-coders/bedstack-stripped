@@ -212,12 +212,10 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						throw new NotFoundError("article");
 					}
 
-					const isFavorited = enrichedArticle.favorites.some(
-						(fav) => fav.userId === currentUserId,
-					);
-
 					return toResponse(enrichedArticle, {
-						favorited: isFavorited,
+						favorited: enrichedArticle.favorites.some(
+							(fav) => fav.userId === currentUserId,
+						),
 						favoritesCount: enrichedArticle.favorites.length,
 						following: enrichedArticle.author.followers.length > 0,
 					});
