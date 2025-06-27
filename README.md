@@ -80,6 +80,23 @@ bun test:unit # Run the unit tests
 > cp .env.test.example .env.test
 > ```
 
+## Building for production
+
+> [!TIP]
+> See more info in ElysiaJS's [building for production](https://elysiajs.com/tutorial.html#build-for-production) guide.
+
+1. Build the app
+
+   ```bash
+   bun run build # not `bun build`!
+   ```
+
+2. Run the production server (preview)
+
+   ```bash
+   bun preview
+   ```
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information, including how to set up your development environment.
