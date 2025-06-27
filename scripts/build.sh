@@ -3,5 +3,5 @@ bun build \
   --minify-whitespace \
   --minify-syntax \
   --target bun \
-  --outfile server \
+  --outfile dist/server \
   src

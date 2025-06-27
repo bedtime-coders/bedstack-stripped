@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "bun run --watch src",
 		"build": "bun run scripts/build.sh",
-		"preview": "bun run dist",
+		"preview": "./dist/server",
 		"fix": "biome check --write",
 		"check": "biome check",
 		"check:errors": "biome check --diagnostic-level=error",
