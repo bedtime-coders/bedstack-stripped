@@ -55,9 +55,9 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					}
 
 					// Build where conditions
-					const whereConditions = [];
+					const filters = [];
 					if (authorUser) {
-						whereConditions.push(eq(articles.authorId, authorUser.id));
+						filters.push(eq(articles.authorId, authorUser.id));
 					}
 					if (favoritedUser) {
 						// For favorited filter, we need to check if the article has a favorite by this user
@@ -66,7 +66,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							.from(favorites)
 							.where(eq(favorites.userId, favoritedUser.id));
 						if (favoritedArticleIds.length > 0) {
-							whereConditions.push(
+							filters.push(
 								inArray(
 									articles.id,
 									favoritedArticleIds.map((f) => f.articleId),
@@ -84,7 +84,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							.innerJoin(tags, eq(tags.id, articlesToTags.tagId))
 							.where(eq(tags.name, tag));
 						if (taggedArticleIds.length > 0) {
-							whereConditions.push(
+							filters.push(
 								inArray(
 									articles.id,
 									taggedArticleIds.map((t) => t.articleId),
@@ -97,10 +97,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 
 					const enrichedArticles: EnrichedArticle[] =
 						await db.query.articles.findMany({
-							where:
-								whereConditions.length > 0
-									? and(...whereConditions)
-									: undefined,
+							where: filters.length > 0 ? and(...filters) : undefined,
 							with: {
 								author: currentUserId
 									? {
@@ -111,11 +108,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 											},
 										}
 									: true,
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true,
 							},
 							orderBy: [desc(articles.createdAt)],
@@ -153,11 +146,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 											},
 										}
 									: true,
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 							},
 						});
 
@@ -210,11 +199,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true,
 							},
 							orderBy: [desc(articles.createdAt)],
@@ -277,11 +262,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						where: eq(articles.id, createdArticle.id),
 						with: {
 							author: true,
-							tags: {
-								with: {
-									tag: true,
-								},
-							},
+							tags: { with: { tag: true } },
 						},
 					});
 
@@ -384,11 +365,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true, // Load all favorites to get count
 							},
 						});
@@ -463,11 +440,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true, // Load all favorites to get count
 							},
 						});
@@ -499,11 +472,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 											},
 										},
 									},
-									tags: {
-										with: {
-											tag: true,
-										},
-									},
+									tags: { with: { tag: true } },
 									favorites: true,
 								},
 							});
@@ -538,11 +507,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true, // Load all favorites to get count
 							},
 						});
@@ -577,11 +542,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: {
-									with: {
-										tag: true,
-									},
-								},
+								tags: { with: { tag: true } },
 								favorites: true,
 							},
 						});
