@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/database/db";
@@ -8,13 +8,8 @@ import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { slugify } from "@/shared/utils";
 import { articlesToTags, tags } from "@/tags/tags.schema";
-import { users } from "@/users/users.schema";
 import { ArticleQuery, articlesModel, FeedQuery } from "./articles.model";
 import { articles, favorites } from "./articles.schema";
-import type {
-	EnrichedArticle,
-	PersonalizedEnrichedArticle,
-} from "./interfaces";
 import { toArticlesResponse, toResponse } from "./mappers";
 
 export const articlesPlugin = new Elysia({ tags: ["Articles"] })
