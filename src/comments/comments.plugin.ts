@@ -19,7 +19,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 				"/",
 				async ({ params: { slug }, auth: { currentUserId } }) => {
 					const article = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
+						where: { slug },
 					});
 					if (!article) {
 						throw new NotFoundError("article");
@@ -31,14 +31,14 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 								? {
 										with: {
 											followers: {
-												where: eq(follows.followerId, currentUserId),
+												where: { followerId: currentUserId },
 											},
 										},
 									}
 								: true,
 						},
-						where: eq(comments.articleId, article.id),
-						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+						where: { articleId: article.id },
+						orderBy: { createdAt: "desc" },
 					});
 
 					const firstComment = enrichedComments[0];
@@ -74,7 +74,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					auth: { currentUserId },
 				}) => {
 					const article = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
+						where: { slug },
 					});
 					if (!article) {
 						throw new NotFoundError("article");
@@ -95,12 +95,12 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					}
 
 					const enrichedComment = await db.query.comments.findFirst({
-						where: eq(comments.id, createdComment.id),
+						where: { id: createdComment.id },
 						with: {
 							author: {
 								with: {
 									followers: {
-										where: eq(follows.followerId, currentUserId),
+										where: { followerId: currentUserId },
 									},
 								},
 							},
@@ -125,14 +125,14 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 				"/:id",
 				async ({ params: { slug, id }, auth: { currentUserId }, set }) => {
 					const article = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
+						where: { slug },
 					});
 					if (!article) {
 						throw new NotFoundError("article");
 					}
 
 					const existingComment = await db.query.comments.findFirst({
-						where: eq(comments.id, id),
+						where: { id },
 					});
 					if (!existingComment) {
 						throw new NotFoundError("comment");
