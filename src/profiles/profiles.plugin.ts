@@ -27,16 +27,16 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 					"/:username",
 					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
-							where: eq(users.username, username),
+							where: { username },
 						});
 						if (!user) throw new NotFoundError("profile");
 						const following = currentUserId
 							? Boolean(
 									await db.query.follows.findFirst({
-										where: and(
-											eq(follows.followerId, currentUserId),
-											eq(follows.followedId, user.id),
-										),
+										where: {
+											followerId: currentUserId,
+											followedId: user.id,
+										},
 									}),
 								)
 							: false;
@@ -62,7 +62,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 					"/:username/follow",
 					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
-							where: eq(users.username, username),
+							where: { username },
 						});
 						if (!user) throw new NotFoundError("profile");
 						if (user.id === currentUserId) {
@@ -92,7 +92,7 @@ export const profiles = new Elysia({ tags: ["Profiles"] })
 					"/:username/follow",
 					async ({ params: { username }, auth: { currentUserId } }) => {
 						const user = await db.query.users.findFirst({
-							where: eq(users.username, username),
+							where: { username },
 						});
 						if (!user) throw new NotFoundError("profile");
 						if (user.id === currentUserId) {
