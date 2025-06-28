@@ -14,7 +14,7 @@ import {
 	tagsRelations,
 } from "@/tags/tags.schema";
 import { users, usersRelations } from "@/users/users.schema";
-import { env } from "./env";
+import { env } from "../env";
 
 export const db = drizzle(env.DATABASE_URL, {
 	schema: {

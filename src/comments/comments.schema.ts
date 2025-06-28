@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { articles } from "@/articles/articles.schema";
 import { users } from "@/users/users.schema";
@@ -26,14 +25,3 @@ export const comments = pgTable(
 		index("comments_created_at_idx").on(table.createdAt),
 	],
 );
-
-export const commentsRelations = relations(comments, ({ one }) => ({
-	article: one(articles, {
-		fields: [comments.articleId],
-		references: [articles.id],
-	}),
-	author: one(users, {
-		fields: [comments.authorId],
-		references: [users.id],
-	}),
-}));

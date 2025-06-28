@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { articles } from "@/articles/articles.schema";
-import { db } from "@/core/db";
+import { db } from "@/core/database/db";
 import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";

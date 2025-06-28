@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
 	index,
 	pgTable,
@@ -7,7 +6,6 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { articlesToTags } from "@/tags/tags.schema";
 import { users } from "@/users/users.schema";
 
 export const articles = pgTable(
@@ -34,15 +32,6 @@ export const articles = pgTable(
 	],
 );
 
-export const articlesRelations = relations(articles, ({ one, many }) => ({
-	author: one(users, {
-		fields: [articles.authorId],
-		references: [users.id],
-	}),
-	tags: many(articlesToTags),
-	favorites: many(favorites),
-}));
-
 export const favorites = pgTable(
 	"favorites",
 	{
@@ -60,14 +49,3 @@ export const favorites = pgTable(
 		index("favorites_article_id_idx").on(table.articleId),
 	],
 );
-
-export const favoritesRelations = relations(favorites, ({ one }) => ({
-	user: one(users, {
-		fields: [favorites.userId],
-		references: [users.id],
-	}),
-	article: one(articles, {
-		fields: [favorites.articleId],
-		references: [articles.id],
-	}),
-}));

@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { db } from "@/core/db";
+import { db } from "@/core/database/db";
 import { follows } from "@/profiles/profiles.schema";
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
 import { RealWorldError } from "@/shared/errors";
