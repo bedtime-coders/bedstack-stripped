@@ -1,9 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { articles } from "@/articles/articles.schema";
 import { db } from "@/core/database/db";
-import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { commentsModel, UUID } from "./comments.model";
@@ -27,15 +25,13 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 
 					const enrichedComments = await db.query.comments.findMany({
 						with: {
-							author: currentUserId
-								? {
-										with: {
-											followers: {
-												where: { followerId: currentUserId },
-											},
-										},
-									}
-								: true,
+							author: {
+								with: {
+									followers: {
+										where: {},
+									},
+								},
+							},
 						},
 						where: { articleId: article.id },
 						orderBy: { createdAt: "desc" },
