@@ -37,12 +37,18 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					const [authorUser, favoritedUser] = await Promise.all([
 						authorUsername
 							? db.query.users.findFirst({
-									where: eq(users.username, authorUsername),
+									// where: eq(users.username, authorUsername),
+									// relational queries v2:
+									where: {
+										username: authorUsername,
+									},
 								})
 							: undefined,
 						favoritedByUsername
 							? db.query.users.findFirst({
-									where: eq(users.username, favoritedByUsername),
+									where: {
+										username: favoritedByUsername,
+									},
 								})
 							: undefined,
 					]);
@@ -83,26 +89,30 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						);
 					}
 
-					const enrichedArticles: EnrichedArticle[] =
-						await db.query.articles.findMany({
-							where: filters.length > 0 ? and(...filters) : undefined,
-							with: {
-								author: currentUserId
-									? {
-											with: {
-												followers: {
-													where: eq(follows.followerId, currentUserId),
-												},
+					const enrichedArticles = await db.query.articles.findMany({
+						where: {
+							RAW: filters.length > 0 ? and(...filters) : undefined,
+						},
+						with: {
+							author: currentUserId
+								? {
+										with: {
+											followers: {
+												where: eq(follows.followerId, currentUserId),
 											},
-										}
-									: true,
-								tags: { with: { tag: true } },
-								favorites: true,
-							},
-							orderBy: [desc(articles.createdAt)],
-							limit,
-							offset,
-						});
+										},
+									}
+								: true,
+							tags: { with: { tag: true } },
+							favorites: true,
+						},
+						// orderBy: [desc(articles.createdAt)],
+						orderBy: {
+							createdAt: "desc",
+						},
+						limit,
+						offset,
+					});
 
 					return toArticlesResponse(enrichedArticles, {
 						currentUserId,
@@ -121,22 +131,21 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 			.get(
 				"/:slug",
 				async ({ params: { slug }, auth: { currentUserId } }) => {
-					const enrichedArticle: EnrichedArticle | undefined =
-						await db.query.articles.findFirst({
-							where: eq(articles.slug, slug),
-							with: {
-								author: currentUserId
-									? {
-											with: {
-												followers: {
-													where: eq(follows.followerId, currentUserId),
-												},
+					const enrichedArticle = await db.query.articles.findFirst({
+						where: { slug },
+						with: {
+							author: currentUserId
+								? {
+										with: {
+											followers: {
+												where: eq(follows.followerId, currentUserId),
 											},
-										}
-									: true,
-								tags: { with: { tag: true } },
-							},
-						});
+										},
+									}
+								: true,
+							tags: { with: { tag: true } },
+						},
+					});
 
 					if (!enrichedArticle) {
 						throw new NotFoundError("article");
@@ -176,24 +185,25 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					if (followedIds.length === 0) return toArticlesResponse([]);
 
 					// Get articles from followed authors
-					const enrichedArticles: EnrichedArticle[] =
-						await db.query.articles.findMany({
-							where: inArray(articles.authorId, followedIds),
-							with: {
-								author: {
-									with: {
-										followers: {
-											where: eq(follows.followerId, currentUserId),
-										},
+					const enrichedArticles = await db.query.articles.findMany({
+						where: inArray(articles.authorId, followedIds),
+						with: {
+							author: {
+								with: {
+									followers: {
+										where: eq(follows.followerId, currentUserId),
 									},
 								},
-								tags: { with: { tag: true } },
-								favorites: true,
 							},
-							orderBy: [desc(articles.createdAt)],
-							limit,
-							offset,
-						});
+							tags: { with: { tag: true } },
+							favorites: true,
+						},
+						orderBy: {
+							createdAt: "desc",
+						},
+						limit,
+						offset,
+					});
 
 					return toArticlesResponse(enrichedArticles, { currentUserId });
 				},
@@ -247,7 +257,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					);
 
 					const enrichedArticle = await db.query.articles.findFirst({
-						where: eq(articles.id, createdArticle.id),
+						where: { id: createdArticle.id },
 						with: {
 							author: true,
 							tags: { with: { tag: true } },
@@ -277,7 +287,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					auth: { currentUserId },
 				}) => {
 					const existingArticle = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
+						where: { slug },
 					});
 
 					if (!existingArticle) {
@@ -342,21 +352,20 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					}
 
 					// Get updated article with relations
-					const enrichedArticle: EnrichedArticle | undefined =
-						await db.query.articles.findFirst({
-							where: eq(articles.id, updatedArticle.id),
-							with: {
-								author: {
-									with: {
-										followers: {
-											where: eq(follows.followerId, currentUserId),
-										},
+					const enrichedArticle = await db.query.articles.findFirst({
+						where: { id: updatedArticle.id },
+						with: {
+							author: {
+								with: {
+									followers: {
+										where: eq(follows.followerId, currentUserId),
 									},
 								},
-								tags: { with: { tag: true } },
-								favorites: true, // Load all favorites to get count
 							},
-						});
+							tags: { with: { tag: true } },
+							favorites: true, // Load all favorites to get count
+						},
+					});
 
 					if (!enrichedArticle) {
 						throw new NotFoundError("article");
@@ -378,7 +387,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				"/:slug",
 				async ({ params: { slug }, auth: { currentUserId }, set }) => {
 					const existingArticle = await db.query.articles.findFirst({
-						where: eq(articles.slug, slug),
+						where: { slug },
 					});
 
 					if (!existingArticle) {
@@ -417,21 +426,20 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				"/:slug/favorite",
 				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Fetch everything in one go
-					const enrichedArticle: PersonalizedEnrichedArticle | undefined =
-						await db.query.articles.findFirst({
-							where: eq(articles.slug, slug),
-							with: {
-								author: {
-									with: {
-										followers: {
-											where: eq(follows.followerId, currentUserId),
-										},
+					const enrichedArticle = await db.query.articles.findFirst({
+						where: { slug },
+						with: {
+							author: {
+								with: {
+									followers: {
+										where: eq(follows.followerId, currentUserId),
 									},
 								},
-								tags: { with: { tag: true } },
-								favorites: true, // Load all favorites to get count
 							},
-						});
+							tags: { with: { tag: true } },
+							favorites: true, // Load all favorites to get count
+						},
+					});
 
 					if (!enrichedArticle) {
 						throw new NotFoundError("article");
@@ -449,21 +457,20 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						});
 
 						// Reload the article to get updated favorites count
-						const updatedArticle: EnrichedArticle | undefined =
-							await db.query.articles.findFirst({
-								where: eq(articles.slug, slug),
-								with: {
-									author: {
-										with: {
-											followers: {
-												where: eq(follows.followerId, currentUserId),
-											},
+						const updatedArticle = await db.query.articles.findFirst({
+							where: { slug },
+							with: {
+								author: {
+									with: {
+										followers: {
+											where: eq(follows.followerId, currentUserId),
 										},
 									},
-									tags: { with: { tag: true } },
-									favorites: true,
 								},
-							});
+								tags: { with: { tag: true } },
+								favorites: true,
+							},
+						});
 
 						if (updatedArticle) {
 							return toResponse(updatedArticle, { currentUserId });
@@ -484,21 +491,20 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				"/:slug/favorite",
 				async ({ params: { slug }, auth: { currentUserId } }) => {
 					// Fetch everything in one go
-					const enrichedArticle: EnrichedArticle | undefined =
-						await db.query.articles.findFirst({
-							where: eq(articles.slug, slug),
-							with: {
-								author: {
-									with: {
-										followers: {
-											where: eq(follows.followerId, currentUserId),
-										},
+					const enrichedArticle = await db.query.articles.findFirst({
+						where: { slug },
+						with: {
+							author: {
+								with: {
+									followers: {
+										where: eq(follows.followerId, currentUserId),
 									},
 								},
-								tags: { with: { tag: true } },
-								favorites: true, // Load all favorites to get count
 							},
-						});
+							tags: { with: { tag: true } },
+							favorites: true, // Load all favorites to get count
+						},
+					});
 
 					if (!enrichedArticle) {
 						throw new NotFoundError("article");
@@ -521,7 +527,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 
 						// Reload the article to get updated favorites count
 						const updatedArticle = await db.query.articles.findFirst({
-							where: eq(articles.slug, slug),
+							where: { slug },
 							with: {
 								author: {
 									with: {
