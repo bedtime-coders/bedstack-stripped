@@ -17,7 +17,7 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 				"/login",
 				async ({ body: { user }, auth: { sign } }) => {
 					const foundUser = await db.query.users.findFirst({
-						where: eq(users.email, user.email),
+						where: { email: user.email },
 					});
 					if (!foundUser) {
 						throw new NotFoundError("user");
@@ -50,7 +50,9 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 						},
 						async (key, value) => {
 							const existing = await db.query.users.findFirst({
-								where: eq(users[key], value),
+								where: {
+									[key]: value,
+								},
 							});
 							return Boolean(existing);
 						},
@@ -87,7 +89,7 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 				"/",
 				async ({ auth: { sign, currentUserId } }) => {
 					const user = await db.query.users.findFirst({
-						where: eq(users.id, currentUserId),
+						where: { id: currentUserId },
 					});
 					if (!user) {
 						throw new NotFoundError("user");
@@ -116,7 +118,9 @@ export const usersPlugin = new Elysia({ tags: ["Auth"] })
 						},
 						async (key, value) => {
 							const existing = await db.query.users.findFirst({
-								where: eq(users[key], value),
+								where: {
+									[key]: value,
+								},
 							});
 							return Boolean(existing && existing.id !== currentUserId);
 						},
