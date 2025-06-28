@@ -8,7 +8,6 @@ import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { commentsModel, UUID } from "./comments.model";
 import { comments } from "./comments.schema";
-import type { EnrichedComment } from "./interfaces";
 import { toCommentResponse, toCommentsResponse } from "./mappers";
 
 export const commentsPlugin = new Elysia({ tags: ["Comments"] })
@@ -26,22 +25,29 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("article");
 					}
 
-					const enrichedComments: EnrichedComment[] =
-						await db.query.comments.findMany({
-							with: {
-								author: currentUserId
-									? {
-											with: {
-												followers: {
-													where: eq(follows.followerId, currentUserId),
-												},
+					const enrichedComments = await db.query.comments.findMany({
+						with: {
+							author: currentUserId
+								? {
+										with: {
+											followers: {
+												where: eq(follows.followerId, currentUserId),
 											},
-										}
-									: true,
-							},
-							where: eq(comments.articleId, article.id),
-							orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+										},
+									}
+								: true,
+						},
+						where: eq(comments.articleId, article.id),
+						orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+					});
+
+					const firstComment = enrichedComments[0];
+					if (firstComment) {
+						const followers = firstComment.author?.followers;
+						enrichedComments.forEach((comment) => {
+							comment.author.followers = followers;
 						});
+					}
 
 					return toCommentsResponse(enrichedComments, { currentUserId });
 				},
