@@ -30,17 +30,23 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 				}) => {
 					const enrichedArticles = await db.query.articles.findMany({
 						where: {
-							author: {
-								username: authorUsername,
-							},
-							favorites: {
-								user: {
-									username: favoritedByUsername,
+							...(authorUsername && {
+								author: {
+									username: authorUsername,
 								},
-							},
-							tags: {
-								name: tagName,
-							},
+							}),
+							...(favoritedByUsername && {
+								favorites: {
+									user: {
+										username: favoritedByUsername,
+									},
+								},
+							}),
+							...(tagName && {
+								tags: {
+									name: tagName,
+								},
+							}),
 						},
 						with: {
 							author: {
