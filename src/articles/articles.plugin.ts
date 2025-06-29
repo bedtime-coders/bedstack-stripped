@@ -89,24 +89,19 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							RAW: filters.length > 0 ? and(...filters) : undefined,
 						},
 						with: {
-							author: currentUserId
-								? {
-										with: {
-											followers: {
-												where: {
-													id: currentUserId,
-												},
-											},
+							author: {
+								with: {
+									followers: {
+										where: {
+											id: currentUserId ?? undefined,
 										},
-									}
-								: true,
+									},
+								},
+							},
 							tags: true,
 							favorites: true,
 						},
-						// orderBy: [desc(articles.createdAt)],
-						orderBy: {
-							createdAt: "desc",
-						},
+						orderBy: { createdAt: "desc" },
 						limit,
 						offset,
 					});
@@ -185,7 +180,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 
 					// Get articles from followed authors
 					const enrichedArticles = await db.query.articles.findMany({
-						where: inArray(articles.authorId, followedIds),
+						where: {
+							authorId: {
+								in: followedIds,
+							},
+						},
 						with: {
 							author: {
 								with: {
@@ -231,7 +230,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						.onConflictDoNothing();
 
 					const relevantTags = await db.query.tags.findMany({
-						where: inArray(tags.name, tagList),
+						where: {
+							name: {
+								in: tagList,
+							},
+						},
 					});
 
 					const [createdArticle] = await db
@@ -261,7 +264,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						where: { id: createdArticle.id },
 						with: {
 							author: true,
-							tags: { with: { tag: true } },
+							tags: true,
 						},
 					});
 
@@ -339,7 +342,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 
 							// Get all relevant tags in one query
 							const relevantTags = await db.query.tags.findMany({
-								where: inArray(tags.name, article.tagList),
+								where: {
+									name: {
+										in: article.tagList,
+									},
+								},
 							});
 
 							// Connect tags to article
@@ -474,7 +481,7 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 										},
 									},
 								},
-								tags: { with: { tag: true } },
+								tags: true,
 								favorites: true,
 							},
 						});

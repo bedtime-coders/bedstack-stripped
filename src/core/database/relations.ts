@@ -21,6 +21,7 @@ export const relations = defineRelations(schema, (r) => ({
 		author: r.one.users({
 			from: r.articles.authorId,
 			to: r.users.id,
+			optional: false,
 		}),
 		tags: r.many.tags({
 			from: r.articles.id.through(r.articlesToTags.articleId),
