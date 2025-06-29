@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Bedstack (Stripped)** is a _distilled version_ of [the full Bedstack architecture](https://github.com/bedtime-coders/bedstack/blob/beta/ARCHITECTURE.md). It keeps the _feature-sliced, modular structure_ but simplifies the layering for _rapid prototyping_.
+**Bedstack (Stripped)** is a _distilled version_ of [the full Bedstack architecture](https://github.com/bedtime-coders/bedstack/blob/drizzle-v1/ARCHITECTURE.md). It keeps the _feature-sliced, modular structure_ but simplifies the layering for _rapid prototyping_.
 
 Each feature is self-contained and designed for clarity, fast development, and maintainability - without the overhead of full enterprise layering.
 
@@ -109,7 +109,7 @@ drizzle/                   # Migrations, reset, seed
 
 ### See Also
 
-- [Bedstack Full Architecture](https://github.com/bedtime-coders/bedstack/blob/beta/ARCHITECTURE.md)
+- [Bedstack Full Architecture](https://github.com/bedtime-coders/bedstack/blob/drizzle-v1/ARCHITECTURE.md)
 - [ElysiaJS Docs](https://elysiajs.com/docs)
 - [Drizzle ORM Docs](https://orm.drizzle.team/docs)
 - [TypeBox Docs](https://typebox.io/docs)

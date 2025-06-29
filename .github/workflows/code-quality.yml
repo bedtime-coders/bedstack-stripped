@@ -6,7 +6,7 @@ on:
   pull_request:
     branches:
       - main
-      - beta
+      - drizzle-v1
 
 jobs:
   biome:
