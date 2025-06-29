@@ -1,10 +1,8 @@
-import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/database/db";
 import { env } from "@/core/env";
 import { RealWorldError } from "@/shared/errors";
-import { users } from "@/users/users.schema";
 import { name } from "../../../package.json";
 import jwt from "./jwt.plugin";
 import { token } from "./token.plugin";
@@ -39,7 +37,7 @@ export const auth = new Elysia()
 						iat: Math.floor(Date.now() / 1000),
 					})) satisfies SignFn,
 				jwtPayload: jwtPayload || null,
-				currentUserId: jwtPayload ? jwtPayload.uid : null,
+				currentUserId: jwtPayload ? jwtPayload.uid : undefined,
 			},
 		};
 	})
@@ -64,7 +62,9 @@ export const auth = new Elysia()
 
 				// Check user exists in DB
 				const user = await db.query.users.findFirst({
-					where: eq(users.id, currentUserId),
+					where: {
+						id: currentUserId,
+					},
 				});
 				if (!user) {
 					throw new RealWorldError(StatusCodes.UNAUTHORIZED, {

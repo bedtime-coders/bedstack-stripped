@@ -1,9 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
-import { articles } from "@/articles/articles.schema";
 import { db } from "@/core/database/db";
-import { follows } from "@/profiles/profiles.schema";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
 import { commentsModel, UUID } from "./comments.model";
@@ -27,28 +25,19 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 
 					const enrichedComments = await db.query.comments.findMany({
 						with: {
-							author: currentUserId
-								? {
-										with: {
-											followers: {
-												where: { followerId: currentUserId },
-											},
+							author: {
+								with: {
+									followers: {
+										where: {
+											id: currentUserId,
 										},
-									}
-								: true,
+									},
+								},
+							},
 						},
 						where: { articleId: article.id },
 						orderBy: { createdAt: "desc" },
 					});
-
-					const firstComment = enrichedComments[0];
-					if (firstComment) {
-						const followers = firstComment.author?.followers;
-						enrichedComments.forEach((comment) => {
-							comment.author.followers = followers;
-						});
-					}
-
 					return toCommentsResponse(enrichedComments, { currentUserId });
 				},
 				{
@@ -100,7 +89,9 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 							author: {
 								with: {
 									followers: {
-										where: { followerId: currentUserId },
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},

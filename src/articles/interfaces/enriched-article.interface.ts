@@ -1,6 +1,5 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { follows } from "@/profiles/profiles.schema";
-import type { articlesToTags, tags } from "@/tags/tags.schema";
+import type { tags } from "@/tags/tags.schema";
 import type { users } from "@/users/users.schema";
 import type { articles, favorites } from "../articles.schema";
 
@@ -9,13 +8,9 @@ import type { articles, favorites } from "../articles.schema";
  */
 export type EnrichedArticle = InferSelectModel<typeof articles> & {
 	author: InferSelectModel<typeof users> & {
-		followers?: Array<InferSelectModel<typeof follows>>;
+		followers?: Array<InferSelectModel<typeof users>>;
 	};
-	tags: Array<
-		InferSelectModel<typeof articlesToTags> & {
-			tag: InferSelectModel<typeof tags>;
-		}
-	>;
+	tags: Array<InferSelectModel<typeof tags>>;
 	favorites?: Array<InferSelectModel<typeof favorites>>;
 };
 
@@ -24,7 +19,7 @@ export type EnrichedArticle = InferSelectModel<typeof articles> & {
  */
 export type PersonalizedEnrichedArticle = EnrichedArticle & {
 	author: InferSelectModel<typeof users> & {
-		followers?: Array<InferSelectModel<typeof follows>>;
+		followers?: Array<InferSelectModel<typeof users>>;
 	};
 	favorites: Array<InferSelectModel<typeof favorites>>;
 };

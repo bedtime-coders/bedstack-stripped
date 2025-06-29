@@ -37,7 +37,7 @@ export function toCommentResponse(
 				following: Boolean(
 					currentUserId &&
 						enrichedComment.author.followers?.some(
-							(f) => f.followerId === currentUserId,
+							(f) => f.id === currentUserId,
 						),
 				),
 			},

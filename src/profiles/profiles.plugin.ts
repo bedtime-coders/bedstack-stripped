@@ -4,7 +4,6 @@ import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/database/db";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
-import { users } from "@/users/users.schema";
 import { toResponse } from "./mappers";
 import { profilesModel } from "./profiles.model";
 import { follows } from "./profiles.schema";

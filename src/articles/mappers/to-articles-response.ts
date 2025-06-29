@@ -14,8 +14,7 @@ export function toArticlesResponse(
 		const myFavorites =
 			article.favorites?.filter((f) => f.userId === currentUserId) ?? [];
 		const myFollows =
-			article.author.followers?.filter((f) => f.followerId === currentUserId) ??
-			[];
+			article.author.followers?.filter((f) => f.id === currentUserId) ?? [];
 		const favoritesCount = article.favorites?.length ?? 0;
 		const isFavorited = myFavorites.length > 0;
 		const isFollowing = myFollows.length > 0;
@@ -24,7 +23,7 @@ export function toArticlesResponse(
 			title: article.title,
 			description: article.description,
 			tagList: article.tags
-				.map((t) => t.tag.name)
+				.map((t) => t.name)
 				.sort((a, b) => a.localeCompare(b)),
 			createdAt: article.createdAt.toISOString(),
 			updatedAt: article.updatedAt.toISOString(),

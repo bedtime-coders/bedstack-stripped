@@ -1,4 +1,4 @@
-import type { DrizzleQueryError } from "drizzle-orm/errors";
+import type { DrizzleError } from "drizzle-orm/errors";
 import type { NotFoundError, ValidationError } from "elysia";
 import { ConflictingFieldsError } from "./conflicting-fields";
 
@@ -72,7 +72,7 @@ export function formatNotFoundError(error: NotFoundError) {
 	};
 }
 
-export function formatDBError(error: DrizzleQueryError) {
+export function formatDBError(error: DrizzleError) {
 	console.error(error);
 	return {
 		errors: {
