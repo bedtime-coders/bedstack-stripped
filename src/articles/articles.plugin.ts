@@ -1,8 +1,7 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Elysia, NotFoundError, t } from "elysia";
 import { StatusCodes } from "http-status-codes";
 import { db } from "@/core/database/db";
-import { follows } from "@/profiles/profiles.schema";
 import { DEFAULT_LIMIT, DEFAULT_OFFSET } from "@/shared/constants";
 import { RealWorldError } from "@/shared/errors";
 import { auth } from "@/shared/plugins";
@@ -29,71 +28,26 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					},
 					auth: { currentUserId },
 				}) => {
-					const [authorUser, favoritedUser] = await Promise.all([
-						authorUsername
-							? db.query.users.findFirst({
-									// where: eq(users.username, authorUsername),
-									// relational queries v2:
-									where: {
-										username: authorUsername,
-									},
-								})
-							: undefined,
-						favoritedByUsername
-							? db.query.users.findFirst({
-									where: {
-										username: favoritedByUsername,
-									},
-								})
-							: undefined,
-					]);
-
-					if (
-						(authorUsername && !authorUser) ||
-						(favoritedByUsername && !favoritedUser)
-					) {
-						return toArticlesResponse([]);
-					}
-
-					// Build dynamic filters
-					const filters = [];
-					if (authorUser) {
-						filters.push(eq(articles.authorId, authorUser.id));
-					}
-					if (favoritedUser) {
-						filters.push(
-							inArray(
-								articles.id,
-								db
-									.select({ articleId: favorites.articleId })
-									.from(favorites)
-									.where(eq(favorites.userId, favoritedUser.id)),
-							),
-						);
-					}
-					if (tagName) {
-						filters.push(
-							inArray(
-								articles.id,
-								db
-									.select({ articleId: articlesToTags.articleId })
-									.from(articlesToTags)
-									.innerJoin(tags, eq(tags.id, articlesToTags.tagId))
-									.where(eq(tags.name, tagName)),
-							),
-						);
-					}
-
 					const enrichedArticles = await db.query.articles.findMany({
 						where: {
-							RAW: filters.length > 0 ? and(...filters) : undefined,
+							author: {
+								username: authorUsername,
+							},
+							favorites: {
+								user: {
+									username: favoritedByUsername,
+								},
+							},
+							tags: {
+								name: tagName,
+							},
 						},
 						with: {
 							author: {
 								with: {
 									followers: {
 										where: {
-											id: currentUserId ?? undefined,
+											id: currentUserId,
 										},
 									},
 								},
@@ -105,7 +59,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						limit,
 						offset,
 					});
-
 					return toArticlesResponse(enrichedArticles, {
 						currentUserId,
 					});
@@ -126,17 +79,15 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					const enrichedArticle = await db.query.articles.findFirst({
 						where: { slug },
 						with: {
-							author: currentUserId
-								? {
-										with: {
-											followers: {
-												where: {
-													id: currentUserId,
-												},
-											},
+							author: {
+								with: {
+									followers: {
+										where: {
+											id: currentUserId,
 										},
-									}
-								: true,
+									},
+								},
+							},
 							tags: true,
 						},
 					});
@@ -169,20 +120,12 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 					query: { limit = DEFAULT_LIMIT, offset = DEFAULT_OFFSET },
 					auth: { currentUserId },
 				}) => {
-					// Get followed user IDs
-					const followed = await db
-						.select({ followedId: follows.followedId })
-						.from(follows)
-						.where(eq(follows.followerId, currentUserId));
-
-					const followedIds = followed.map((f) => f.followedId);
-					if (followedIds.length === 0) return toArticlesResponse([]);
-
-					// Get articles from followed authors
 					const enrichedArticles = await db.query.articles.findMany({
 						where: {
-							authorId: {
-								in: followedIds,
+							author: {
+								followers: {
+									id: currentUserId,
+								},
 							},
 						},
 						with: {
@@ -204,7 +147,6 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 						limit,
 						offset,
 					});
-
 					return toArticlesResponse(enrichedArticles, { currentUserId });
 				},
 				{

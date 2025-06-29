@@ -29,7 +29,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 								with: {
 									followers: {
 										where: {
-											id: currentUserId ?? undefined,
+											id: currentUserId,
 										},
 									},
 								},
