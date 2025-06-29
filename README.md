@@ -9,6 +9,9 @@
 
 </div>
 
+> [!TIP]
+> **NEW!** We've released a version of _Bedstack (Stripped)_ that uses Drizzle v1! Check out the [`drizzle-v1` branch](https://github.com/bedtime-coders/bedstack-stripped/tree/drizzle-v1) for more details. Note that Drizzle v1 is currently in beta - when it officially releases we will merge it into the main branch.
+
 ## Bedstack: Bun + ElysiaJS + Drizzle Stack
 
 **Bedstack** is a collection of bleeding-edge technologies to build modern web applications.
