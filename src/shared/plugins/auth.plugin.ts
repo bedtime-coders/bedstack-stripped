@@ -37,7 +37,7 @@ export const auth = new Elysia()
 						iat: Math.floor(Date.now() / 1000),
 					})) satisfies SignFn,
 				jwtPayload: jwtPayload || null,
-				currentUserId: jwtPayload ? jwtPayload.uid : null,
+				currentUserId: jwtPayload ? jwtPayload.uid : undefined,
 			},
 		};
 	})

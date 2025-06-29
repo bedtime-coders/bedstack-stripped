@@ -38,18 +38,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						where: { articleId: article.id },
 						orderBy: { createdAt: "desc" },
 					});
-
-					const firstComment = enrichedComments[0];
-					console.log(firstComment);
-					if (firstComment) {
-						const followers = firstComment.author.followers;
-						console.log(followers);
-						enrichedComments.forEach((comment) => {
-							comment.author.followers = followers;
-						});
-					}
-
-					return toCommentsResponse(transformedComments, { currentUserId });
+					return toCommentsResponse(enrichedComments, { currentUserId });
 				},
 				{
 					detail: {
@@ -112,22 +101,7 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("comment");
 					}
 
-					// Transform to match EnrichedComment type
-					const transformedComment = {
-						...enrichedComment,
-						author: {
-							...enrichedComment.author!,
-							followers:
-								enrichedComment.author!.followers?.map((follower) => ({
-									followerId: follower.id,
-									followedId: enrichedComment.authorId,
-									createdAt: new Date(),
-									updatedAt: new Date(),
-								})) || undefined,
-						},
-					};
-
-					return toCommentResponse(transformedComment, { currentUserId });
+					return toCommentResponse(enrichedComment, { currentUserId });
 				},
 				{
 					detail: {
