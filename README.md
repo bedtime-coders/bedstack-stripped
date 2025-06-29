@@ -10,7 +10,7 @@
 </div>
 
 > [!IMPORTANT]
-> You are viewing the **beta** branch of _Bedstack (Stripped)_. Click [here](https://github.com/bedtime-coders/bedstack-stripped/tree/main) to view the main branch.
+> You are viewing the **beta** branch of _Bedstack (Stripped)_, where we use the [beta version of Drizzle v1](https://orm.drizzle.team/roadmap). Click [here](https://github.com/bedtime-coders/bedstack-stripped/tree/main) to view the main branch.
 
 ## Bedstack: Bun + ElysiaJS + Drizzle Stack
 
