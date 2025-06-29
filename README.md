@@ -14,10 +14,10 @@
 
 ## Drizzle ORM v1 & Relational API v2
 
-This branch uses [Drizzle ORM v1](https://orm.drizzle.team/roadmap), which is currently in beta. The main feature from Drizzle ORM v1 that we use here is Relational API v2 (often referred to as rqbv2).
+This branch uses [Drizzle ORM v1](https://orm.drizzle.team/roadmap), which is currently in beta. The main feature from Drizzle ORM v1 that we use here is Relational API v2 (often referred to as `rqbv2`).
 
 - GitHub Discussion to learn more about Relational API v2: https://github.com/drizzle-team/drizzle-orm/discussions/2316.
-- Drizzle website page to track the release of Drizzle ORM v1: https://orm.drizzle.team/roadmap.
+- Drizzle website page to track the release of Drizzle v1: https://orm.drizzle.team/roadmap.
 
 ## Bedstack: Bun + ElysiaJS + Drizzle Stack
 
