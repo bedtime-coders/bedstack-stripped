@@ -9,8 +9,8 @@
 
 </div>
 
-[!IMPORTANT]
-> You are viewing the **beta** branch of Bedstack (Stripped). For the main branch, see [Bedstack](https://github.com/bedtime-coders/bedstack).
+> [!IMPORTANT]
+> You are viewing the **beta** branch of _Bedstack (Stripped)_. Click [here](https://github.com/bedtime-coders/bedstack-stripped/tree/main) to view the main branch.
 
 ## Bedstack: Bun + ElysiaJS + Drizzle Stack
 
