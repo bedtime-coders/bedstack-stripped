@@ -39,7 +39,7 @@ export function toResponse(
 	const favorited = article.favorites?.some((f) => f.userId === currentUserId);
 	const favoritesCount = article.favorites?.length ?? 0;
 	const following = article.author.followers?.some(
-		(f) => f.followerId === currentUserId,
+		(f) => f.id === currentUserId,
 	);
 
 	return {
@@ -49,7 +49,7 @@ export function toResponse(
 			description: article.description,
 			body: article.body,
 			tagList: article.tags
-				.map((t) => t.tag.name)
+				.map((t) => t.name)
 				.sort((a, b) => a.localeCompare(b)),
 			createdAt: article.createdAt.toISOString(),
 			updatedAt: article.updatedAt.toISOString(),
