@@ -28,7 +28,9 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 							author: {
 								with: {
 									followers: {
-										where: {},
+										where: {
+											id: currentUserId ?? undefined,
+										},
 									},
 								},
 							},
@@ -38,14 +40,16 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 					});
 
 					const firstComment = enrichedComments[0];
+					console.log(firstComment);
 					if (firstComment) {
-						const followers = firstComment.author?.followers;
+						const followers = firstComment.author.followers;
+						console.log(followers);
 						enrichedComments.forEach((comment) => {
 							comment.author.followers = followers;
 						});
 					}
 
-					return toCommentsResponse(enrichedComments, { currentUserId });
+					return toCommentsResponse(transformedComments, { currentUserId });
 				},
 				{
 					detail: {
@@ -96,7 +100,9 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 							author: {
 								with: {
 									followers: {
-										where: { followerId: currentUserId },
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},
@@ -106,7 +112,22 @@ export const commentsPlugin = new Elysia({ tags: ["Comments"] })
 						throw new NotFoundError("comment");
 					}
 
-					return toCommentResponse(enrichedComment, { currentUserId });
+					// Transform to match EnrichedComment type
+					const transformedComment = {
+						...enrichedComment,
+						author: {
+							...enrichedComment.author!,
+							followers:
+								enrichedComment.author!.followers?.map((follower) => ({
+									followerId: follower.id,
+									followedId: enrichedComment.authorId,
+									createdAt: new Date(),
+									updatedAt: new Date(),
+								})) || undefined,
+						},
+					};
+
+					return toCommentResponse(transformedComment, { currentUserId });
 				},
 				{
 					detail: {

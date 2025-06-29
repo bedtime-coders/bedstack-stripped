@@ -93,12 +93,14 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								? {
 										with: {
 											followers: {
-												where: eq(follows.followerId, currentUserId),
+												where: {
+													id: currentUserId,
+												},
 											},
 										},
 									}
 								: true,
-							tags: { with: { tag: true } },
+							tags: true,
 							favorites: true,
 						},
 						// orderBy: [desc(articles.createdAt)],
@@ -133,12 +135,14 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								? {
 										with: {
 											followers: {
-												where: eq(follows.followerId, currentUserId),
+												where: {
+													id: currentUserId,
+												},
 											},
 										},
 									}
 								: true,
-							tags: { with: { tag: true } },
+							tags: true,
 						},
 					});
 
@@ -186,11 +190,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							author: {
 								with: {
 									followers: {
-										where: eq(follows.followerId, currentUserId),
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},
-							tags: { with: { tag: true } },
+							tags: true,
 							favorites: true,
 						},
 						orderBy: {
@@ -353,11 +359,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							author: {
 								with: {
 									followers: {
-										where: eq(follows.followerId, currentUserId),
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},
-							tags: { with: { tag: true } },
+							tags: true,
 							favorites: true, // Load all favorites to get count
 						},
 					});
@@ -427,11 +435,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							author: {
 								with: {
 									followers: {
-										where: eq(follows.followerId, currentUserId),
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},
-							tags: { with: { tag: true } },
+							tags: true,
 							favorites: true, // Load all favorites to get count
 						},
 					});
@@ -458,7 +468,9 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								author: {
 									with: {
 										followers: {
-											where: eq(follows.followerId, currentUserId),
+											where: {
+												id: currentUserId,
+											},
 										},
 									},
 								},
@@ -492,11 +504,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 							author: {
 								with: {
 									followers: {
-										where: eq(follows.followerId, currentUserId),
+										where: {
+											id: currentUserId,
+										},
 									},
 								},
 							},
-							tags: { with: { tag: true } },
+							tags: true,
 							favorites: true, // Load all favorites to get count
 						},
 					});
@@ -527,11 +541,13 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								author: {
 									with: {
 										followers: {
-											where: eq(follows.followerId, currentUserId),
+											where: {
+												id: currentUserId,
+											},
 										},
 									},
 								},
-								tags: { with: { tag: true } },
+								tags: true,
 								favorites: true,
 							},
 						});
