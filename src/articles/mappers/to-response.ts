@@ -5,7 +5,7 @@ type ToResponseParams = {
 	 * The ID of the current user
 	 * If provided, the article will be enriched with the current user's information, including article favorites and author following
 	 */
-	currentUserId?: string | null;
+	currentUserId?: string;
 };
 
 /**

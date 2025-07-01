@@ -9,7 +9,7 @@ import type { EnrichedComment } from "../interfaces";
  */
 export function toCommentResponse(
 	enrichedComment: EnrichedComment,
-	{ currentUserId }: { currentUserId?: string | null } = {},
+	{ currentUserId }: { currentUserId?: string } = {},
 ): {
 	comment: {
 		id: string;
@@ -53,7 +53,7 @@ export function toCommentResponse(
  */
 export function toCommentsResponse(
 	enrichedComments: EnrichedComment[],
-	{ currentUserId }: { currentUserId?: string | null } = {},
+	{ currentUserId }: { currentUserId?: string } = {},
 ): {
 	comments: Array<{
 		id: string;

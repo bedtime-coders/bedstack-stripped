@@ -8,7 +8,7 @@ import type { ArticlesResponse, EnrichedArticle } from "../interfaces";
  */
 export function toArticlesResponse(
 	enrichedArticles: EnrichedArticle[],
-	{ currentUserId }: { currentUserId?: string | null } = {},
+	{ currentUserId }: { currentUserId?: string } = {},
 ): ArticlesResponse {
 	const myArticles = enrichedArticles.map((article) => {
 		const myFavorites =
