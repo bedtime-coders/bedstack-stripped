@@ -59,7 +59,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								},
 							},
 							tags: true,
-							favorites: true,
+							favorites: {
+								where: {
+									userId: currentUserId,
+								},
+							},
 						},
 						orderBy: { createdAt: "desc" },
 						limit,
@@ -145,7 +149,11 @@ export const articlesPlugin = new Elysia({ tags: ["Articles"] })
 								},
 							},
 							tags: true,
-							favorites: true,
+							favorites: {
+								where: {
+									userId: currentUserId,
+								},
+							},
 						},
 						orderBy: {
 							createdAt: "desc",

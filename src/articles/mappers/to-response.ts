@@ -1,5 +1,8 @@
 import type { EnrichedArticle } from "../interfaces";
 
+/**
+ * Parameters for the toResponse function
+ */
 type ToResponseParams = {
 	/**
 	 * The ID of the current user

@@ -1,14 +1,24 @@
 import type { ArticlesResponse, EnrichedArticle } from "../interfaces";
 
 /**
+ * Parameters for the toArticlesResponse function
+ */
+type ToArticlesResponseParams = {
+	/**
+	 * The current user's ID. If provided, the articles will be mapped to the current user's perspective.
+	 */
+	currentUserId?: string;
+};
+
+/**
  * Map an array of articles to a response
  * @param enrichedArticles The articles to map, each article is enriched with the user's favorites, follow status, and favorites count
- * @param extras The extras to map, see {@link Extras}
+ * @param params The parameters to map the articles. See {@link ToArticlesResponseParams}
  * @returns The mapped articles
  */
 export function toArticlesResponse(
 	enrichedArticles: EnrichedArticle[],
-	{ currentUserId }: { currentUserId?: string } = {},
+	{ currentUserId }: ToArticlesResponseParams = {},
 ): ArticlesResponse {
 	const myArticles = enrichedArticles.map((article) => {
 		const myFavorites =
